@@ -10,6 +10,21 @@ using UnityEngine;
  */
 public class SemiCircleFoldingAlgorithm : MonoBehaviour
 {
+
+    //testing purposes
+    void Awake()
+    {
+        //Debug.Log("Start1");
+        PaperAirplanePhysicsAttributes airplaneAttributes = new PaperAirplanePhysicsAttributes(
+            numFolds: 3,
+            radius: 5.0f,
+            thickness: 0.1f,
+            mass: 0.2f
+        );
+        Debug.Log(airplaneAttributes.ToString());
+    }
+
+
     public struct PaperAirplanePhysicsAttributes
     {
         private const float THICKNESS_MULTIPLIER_PER_FOLD = 1.7f;
@@ -39,6 +54,12 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
             middleArea = getMiddleArea();
             topArea = getTopArea();
             frontArea = getFrontArea();
+        }
+
+        public override string ToString()
+        {
+            return $"Paper Airplane Physics Attributes:\n" +
+                   $"- Number of Folds: {numberOfFoldds}, Radius: {radius}, Thickness: {thickness}, Mass: {mass}, Middle Area: {middleArea}, Front Area: {frontArea}, Top Area: {topArea}";
         }
 
 
