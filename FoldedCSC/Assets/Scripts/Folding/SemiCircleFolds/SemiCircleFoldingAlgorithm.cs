@@ -16,9 +16,9 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
     {
         //Debug.Log("Start1");
         PaperAirplanePhysicsAttributes airplaneAttributes = new PaperAirplanePhysicsAttributes(
-            numFolds: 3,
-            radius: 5.0f,
-            thickness: 0.1f,
+            numFolds: 1,
+            radius: 7.0f,
+            thickness: 0.2f,
             mass: 0.2f
         );
         Debug.Log(airplaneAttributes.ToString());
@@ -38,7 +38,7 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         private float middleArea; //the middle part of the paper airplane that you hold
         private float frontArea; //the part that goes into the wind/air
         private float topArea;  //the part that is visible from the top down view
-        private float mass;  //weight of paper airplane
+        private float mass;  //weight of paper airplane (Kg)
 
         //physical attributes of a wing+middle part (half of a plane)
         public PaperAirplanePhysicsAttributes(int numFolds, float radius, float thickness, float mass)
@@ -127,22 +127,31 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
             }
         }
 
+        //nose angle starts at 90 and halves each fold
         private float getNoseAngle()
         {
             //angle will halve every fold because sides touch and crease becomes new hypotenuse (or side)
             return NOSE_STARTING_ANGLE * Mathf.Pow((.5f), numberOfFoldds);
         }
 
+        //gets surface area for one side of front of plane using wingspan x width
         private float getFrontArea()
         {
-            //frontal area is the area that goes into the air with forward movement
-            //therefore it will be the thickness of the paper multiplied by the length exposed
-            //there will be two segments (middle and wing) of equal thickness and length (wingspan)
-            float wingSpan = calculateWingspan();
-            //thickness of wing multiplied by wingspan is the area exposed to forward air
-            float segmentArea = getThicknessFolded() * wingSpan;
-            //both the wing and middle area (that are the same size) are exposed to forward movement so multiply by 2
-            return segmentArea * 2;
+            //if no folds have occured the frontal area will be half of thickness * radius / 2 (half of upright piece of paper)
+            switch (numberOfFoldds)
+            {
+                case 0:
+                    //Debug.Log("zero folds!");
+                    return thickness * radius / 2; //if there are no folds the frontal area is thickness * radius / 2 (because this is for each side)
+                default:
+                    //frontal area is the area that goes into the air with forward movement
+                    //therefore it will be the thickness of the paper multiplied by the length exposed
+                    //there will be two segments (middle and wing) of equal thickness and length (wingspan)
+                    float wingSpan = calculateWingspan();
+                    //thickness of wing multiplied by wingspan is the area exposed to forward air by one side
+                    float segmentArea = getThicknessFolded() * wingSpan;
+                    return segmentArea;
+            }
         }
 
         //paper folded upon itself will be around 1.7 times the thickness of the original
@@ -150,10 +159,6 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         {
             //thickness of paper increases exponentially per fold
             return thickness * Mathf.Pow(THICKNESS_MULTIPLIER_PER_FOLD, numberOfFoldds);
-        }
-        public readonly float getWingspan()
-        {
-            return calculateWingspan();
         }
 
         public readonly float getMass()
