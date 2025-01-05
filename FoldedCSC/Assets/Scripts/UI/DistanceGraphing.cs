@@ -21,33 +21,74 @@ public class DistanceGraphing : MonoBehaviour
     float initialDataPointXOffset = 10.0f;
     float initialDataPointYOffset = 7.5f;
 
-    void Start()
-    {
-        List<float> testList = new List<float>() { 0.0f, 3.3f, 3.5f, 2.5f, 4.322f, 10.79f, 50.4f, 99.1f, 99.9f };
-        RenderDataPoints(testList);
-    }
+    //List<float> testList = new List<float>() { 0.0f, 3.3f, 3.5f, 2.5f, 4.322f, 10.79f, 50.4f, 99.1f, 99.9f };
+    List<float> testList = new List<float>();
 
-    private void Awake()
+    void Start()
     {
         graphContainer = GetComponent<RectTransform>();
         //get max height and width of graph
         float graphHeight = graphContainer.sizeDelta.y;
         float graphWidth = graphContainer.sizeDelta.x;
+        Debug.Log($"graph height: {graphHeight}");
+        Debug.Log($"graph width: {graphWidth}");
 
         maxFlightDistance = 100; //max distance at 100 meters for graph
+        RenderDataPoints(testList);
     }
 
+    /*    private void Awake()
+        {
+
+        }*/
+
+    //deletes all children from the distance graph
+    void DeleteAllChildren()
+    {
+        foreach (Transform child in graphContainer)
+        {
+            Destroy(child.gameObject);  // Destroys the child gameObject
+        }
+    }
+
+
+    private float timer = 0f;  // Timer to track time passed
+    private float interval = 1.5f;  // Time interval in seconds
     // Update is called once per frame
     void Update()
     {
+            // Increment the timer by the time passed since the last frame
+            timer += Time.deltaTime;
+
+            // Check if 2 seconds have passed
+            if (timer >= interval)
+            {
+                // Add an item to the list (example: adding the current time)
+                AddToGraph(Random.Range(0f, 100f));  // Adds a random number 0 to 100
+
+                // Reset the timer
+                timer = 0f;
+            }
         
     }
 
+    //adds value to data set and rerenders graph
+    void AddToGraph(float val)
+    {
+        //adds new value to list
+        testList.Add(val);
+        Debug.Log("Item added. List size: " + testList.Count);
+        //removes current data points and connections on graph
+        DeleteAllChildren();
+        //renders data points and connections of list with new addition
+        RenderDataPoints(testList);
+    }
+
     //function for adding a data point to the graph
-    GameObject AddDataPoint(float distance)
+    GameObject AddDataPoint(int index, float distance)
     {
         //add data point to graph
-        Vector2 AnchoredPosition = GetPlacementForDatapoint(distance);
+        Vector2 AnchoredPosition = GetPlacementForDatapoint(index, distance);
         //create new data point object
         GameObject gameObject = new GameObject("circle", typeof(Image));
         //add data point as child of distance graph
@@ -69,14 +110,30 @@ public class DistanceGraphing : MonoBehaviour
 
 
     //calculates where to put data point
-    Vector2 GetPlacementForDatapoint(float distance)
+    Vector2 GetPlacementForDatapoint(int index, float distance)
     {
-        //want data to be constantly added from right to left so increment round number
-        Vector2 newVec = new Vector2(initialDataPointXOffset + (roundNumber++ * dataPointOffsetPerRound), distance + initialDataPointYOffset);
+        //add initial offsets and space according to other data on x axis, y axis is height travelled
+        Vector2 newVec = new Vector2(initialDataPointXOffset + (index * getDataPointSpacingByRound()), distance + initialDataPointYOffset);
 
         return newVec;
     }
 
+    float getDataPointSpacingByRound()
+    {
+        //if there are less than 10 just use the basic offset
+        if (testList.Count <= 10)
+        {
+            return dataPointOffsetPerRound;
+        }
+        else
+        {
+            Debug.Log($"graph width: {graphWidth}");
+            //if there are a lot of data points compress the space to the width / number of data points
+            return graphContainer.sizeDelta.x / testList.Count;
+        }
+    }
+
+    //renders all data points (consider skipping current data point render if next is the same)
     private void RenderDataPoints(List<float> values)
     {
         //want to connect each data point (assuming it has a previous data point)
@@ -85,7 +142,7 @@ public class DistanceGraphing : MonoBehaviour
         {
             //float xPos = i * xOffsetPerPoint;
             float yPos = (values[i] / maxFlightDistance) * 200; //divide flight by max distance and scale up by scalar
-            GameObject dataPoint = AddDataPoint(yPos);
+            GameObject dataPoint = AddDataPoint(i, yPos);
             //with new data point, connect it with the previous data pont (if it exists)
             if (previousDataPoint != null)
             {
@@ -98,6 +155,7 @@ public class DistanceGraphing : MonoBehaviour
         
     }
 
+    //connects two data points
     private void createDataConnection(Vector2 PosA, Vector2 PosB)
     {
         GameObject gameObject = new GameObject("dataConnection", typeof(Image));
