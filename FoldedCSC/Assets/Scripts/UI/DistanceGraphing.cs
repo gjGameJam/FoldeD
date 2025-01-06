@@ -51,7 +51,7 @@ public class DistanceGraphing : MonoBehaviour
         }
     }
 
-
+    //TESTING SECTION to make sure dynamic adjustment of graph works
     private float timer = 0f;  // Timer to track time passed
     private float interval = 1.5f;  // Time interval in seconds
     // Update is called once per frame
@@ -60,17 +60,16 @@ public class DistanceGraphing : MonoBehaviour
             // Increment the timer by the time passed since the last frame
             timer += Time.deltaTime;
 
-            // Check if 2 seconds have passed
+            // Check if interval amount of time has passed
             if (timer >= interval)
             {
-                // Add an item to the list (example: adding the current time)
                 AddToGraph(Random.Range(0f, 100f));  // Adds a random number 0 to 100
 
-                // Reset the timer
+                // Reset the timer to reuse
                 timer = 0f;
             }
-        
-    }
+
+    }//END OF TESTING SECTION to make sure dynamic adjustment of graph works
 
     //adds value to data set and rerenders graph
     void AddToGraph(float val)
