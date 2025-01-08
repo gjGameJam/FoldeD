@@ -3,14 +3,16 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    
-    private Vector3 startingPos; //the starting position for all paper plane spawns
+
+    [SerializeField] private Vector3 startingPos; //the starting position for all paper plane spawns
     private List<GameObject> activeGliders = new List<GameObject>(); // keep track all spawned paper airplanes
+    [SerializeField] private GameObject gliderCameraTest;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        //creates test glider and adds it to active gliders
+        activeGliders.Add(Instantiate(gliderCameraTest, startingPos, Quaternion.identity));
     }
 
     // Update is called once per frame
@@ -58,6 +60,12 @@ public class GameManager : MonoBehaviour
         }
 
         return farthestGlider;
+    }
+
+    //updates leaderboard controller and distance graphing each time data is available
+    void UpdateClientUI()
+    {
+        //look to prevent coupling with camera manager (maybe update from here when leader dies?)
     }
 
 
