@@ -22,6 +22,7 @@ public class LeaderboardController :  MonoBehaviour
         public float DistanceTravelled;
         public int GenerationNumber;
 
+        //data to display on each leaderboard entry (currently not using generation number)
         public LeaderboardEntry(string newName, float floatValue, int intValue)
         {
             Name = newName;
@@ -29,19 +30,12 @@ public class LeaderboardController :  MonoBehaviour
             GenerationNumber = intValue;
         }
 
-        public override string ToString()
-        {
-            //print name and how far it flew (3 decimal places)
-            string retString = $"{Name} flew {DistanceTravelled:F3} Meters";
-            return Name; 
-        }
-
     }
 
 
 
     //function to add leaderboard item (if non-duplicate name)
-    void AddToLeaderboard(string gliderName, int generationNumber, float distanceTravelled)
+    public void AddToLeaderboard(string gliderName, int generationNumber, float distanceTravelled)
     {
         // check if the player's name already exists
         foreach (var entry in leaderBoardEntries)
@@ -79,7 +73,7 @@ public class LeaderboardController :  MonoBehaviour
         foreach (LeaderboardEntry entryData in leaderBoardEntries)
         {
             //use custom toString method to use as text, incrementing index to edit each loop
-            leaderboardText[index++].text = entryData.ToString();
+            leaderboardText[index++].text = $"{entryData.Name} flew {entryData.DistanceTravelled:F3} Meters";
         }
     }
 

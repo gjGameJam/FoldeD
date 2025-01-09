@@ -51,28 +51,10 @@ public class DistanceGraphing : MonoBehaviour
         }
     }
 
-    //TESTING SECTION to make sure dynamic adjustment of graph works
-    private float timer = 0f;  // Timer to track time passed
-    private float interval = 1.5f;  // Time interval in seconds
-    // Update is called once per frame
-    void Update()
-    {
-            // Increment the timer by the time passed since the last frame
-            timer += Time.deltaTime;
-
-            // Check if interval amount of time has passed
-            if (timer >= interval)
-            {
-                AddToGraph(Random.Range(0f, 100f));  // Adds a random number 0 to 100
-
-                // Reset the timer to reuse
-                timer = 0f;
-            }
-
-    }//END OF TESTING SECTION to make sure dynamic adjustment of graph works
+    
 
     //adds value to data set and rerenders graph
-    void AddToGraph(float val)
+    public void AddToGraph(float val)
     {
         //adds new value to list
         testList.Add(val);
@@ -122,7 +104,7 @@ public class DistanceGraphing : MonoBehaviour
         //if there are less than 10 just use the basic offset
         if (testList.Count <= 10)
         {
-            return dataPointOffsetPerRound;
+            return graphContainer.sizeDelta.x / 10;
         }
         else
         {

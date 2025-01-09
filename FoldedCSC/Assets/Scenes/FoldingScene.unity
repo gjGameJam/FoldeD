@@ -613,7 +613,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 050cedf81a367b3489c051fa0b12bb85, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  leaderboardEntries:
+  leaderboardText:
   - {fileID: 636579665}
   - {fileID: 2137506469}
   - {fileID: 1273111126}
@@ -710,6 +710,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startingPos: {x: 0, y: 0, z: 0}
   gliderCameraTest: {fileID: 3667665961188783457, guid: 6d10e887e79198446a7d465e04e9f3e8, type: 3}
+  leaderBoardScript: {fileID: 1004462582}
+  distanceGraphScript: {fileID: 1846460330}
 --- !u!1 &1273111124
 GameObject:
   m_ObjectHideFlags: 0
@@ -1578,6 +1580,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 1273145971613350742, guid: 283ebe2b3b839784d92eb3a8ce25da7d, type: 3}
   m_PrefabInstance: {fileID: 3424784335867901529}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1846460330 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2956825670304214587, guid: 283ebe2b3b839784d92eb3a8ce25da7d, type: 3}
+  m_PrefabInstance: {fileID: 3424784335867901529}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7000f7072aec7cf4b8a0a08b77c4e0fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1933393372
 PrefabInstance:
   m_ObjectHideFlags: 0

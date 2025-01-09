@@ -7,6 +7,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Vector3 startingPos; //the starting position for all paper plane spawns
     private List<GameObject> activeGliders = new List<GameObject>(); // keep track all spawned paper airplanes
     [SerializeField] private GameObject gliderCameraTest;
+    [SerializeField] private LeaderboardController leaderBoardScript; //controls leaderboard
+    [SerializeField] private DistanceGraphing distanceGraphScript; //controls leaderboard
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -15,10 +17,34 @@ public class GameManager : MonoBehaviour
         activeGliders.Add(Instantiate(gliderCameraTest, startingPos, Quaternion.identity));
     }
 
+    //TESTING SECTION to make sure dynamic adjustment of UI
+    private float timer = 0f;  // Timer to track time passed
+    private float interval = 1.5f;  // Time interval in seconds
+    private float testDist = 5;
     // Update is called once per frame
     void Update()
     {
-        
+        // Increment the timer by the time passed since the last frame
+        timer += Time.deltaTime;
+
+        // Check if interval amount of time has passed
+        if (timer >= interval)
+        {
+            AddResultsToUI("timothy", 0, Random.Range(1.0f, 100.0f));
+
+            // Reset the timer to reuse
+            timer = 0f;
+        }
+
+    }//END OF TESTING SECTION to make sure dynamic adjustment of UI works
+
+    void AddResultsToUI(string gliderName, int generationNum, float distanceTravelled)
+    {
+        //update leaderboard with text
+        leaderBoardScript.AddToLeaderboard(gliderName, generationNum, distanceTravelled);
+        //update distance graph with new distance
+        distanceGraphScript.AddToGraph(distanceTravelled);
+
     }
 
     //getter for the gliders still flying
