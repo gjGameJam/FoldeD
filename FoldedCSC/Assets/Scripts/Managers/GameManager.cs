@@ -21,6 +21,7 @@ public class GameManager : MonoBehaviour
     private float timer = 0f;  // Timer to track time passed
     private float interval = 1.5f;  // Time interval in seconds
     private float testDist = 5;
+    int testNum = 0;
     // Update is called once per frame
     void Update()
     {
@@ -30,7 +31,7 @@ public class GameManager : MonoBehaviour
         // Check if interval amount of time has passed
         if (timer >= interval)
         {
-            AddResultsToUI("timothy", 0, Random.Range(1.0f, 100.0f));
+            AddResultsToUI($"timothy{testNum++}", 0, Random.Range(1.0f, 100.0f));
 
             // Reset the timer to reuse
             timer = 0f;
