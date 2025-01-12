@@ -3,6 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
+/**
+ * script to render list of float data points (and connections between data points) on a given rectangle transform
+ * 
+ * @author Grant Benson
+ **/
 public class DistanceGraphing : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -30,17 +36,12 @@ public class DistanceGraphing : MonoBehaviour
         //get max height and width of graph
         float graphHeight = graphContainer.sizeDelta.y;
         float graphWidth = graphContainer.sizeDelta.x;
-        Debug.Log($"graph height: {graphHeight}");
-        Debug.Log($"graph width: {graphWidth}");
+        //Debug.Log($"graph height: {graphHeight}");
+        //Debug.Log($"graph width: {graphWidth}");
 
         maxFlightDistance = 100; //max distance at 100 meters for graph
         RenderDataPoints(testList);
     }
-
-    /*    private void Awake()
-        {
-
-        }*/
 
     //deletes all children from the distance graph
     void DeleteAllChildren()
@@ -58,7 +59,7 @@ public class DistanceGraphing : MonoBehaviour
     {
         //adds new value to list
         testList.Add(val);
-        Debug.Log("Item added. List size: " + testList.Count);
+        //Debug.Log("Item added. List size: " + testList.Count);
         //removes current data points and connections on graph
         DeleteAllChildren();
         //renders data points and connections of list with new addition
@@ -99,6 +100,7 @@ public class DistanceGraphing : MonoBehaviour
         return newVec;
     }
 
+    //helper function to get X spacing between data points
     float getDataPointSpacingByRound()
     {
         //if there are less than 10 just use the basic offset
@@ -108,7 +110,7 @@ public class DistanceGraphing : MonoBehaviour
         }
         else
         {
-            Debug.Log($"graph width: {graphWidth}");
+            //Debug.Log($"graph width: {graphWidth}");
             //if there are a lot of data points compress the space to the width / number of data points
             return graphContainer.sizeDelta.x / testList.Count;
         }

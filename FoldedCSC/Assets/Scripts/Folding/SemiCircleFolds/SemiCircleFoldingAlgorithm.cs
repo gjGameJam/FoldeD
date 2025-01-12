@@ -1,13 +1,12 @@
 using UnityEngine;
 
-
-/*
+/**
  * Algorithm to get surface areas of paper airplane such that the piece of paper is a half circle and each wing is a symmetrical quarter circle
  * given a radius and number of folds, provide surface area of each face making contact with air.
  * 
  * 
- * Author: Grant Benson
- */
+ * @author Grant Benson
+ **/
 public class SemiCircleFoldingAlgorithm : MonoBehaviour
 {
 
@@ -19,7 +18,8 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
             numFolds: 1,
             radius: 7.0f,
             thickness: 0.2f,
-            mass: 0.2f
+            density: 0.2f,
+            canFly: false
         );
         Debug.Log(airplaneAttributes.ToString());
     }
@@ -34,6 +34,7 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         private float radius;
         private float thickness;
         private int numberOfFoldds;
+        private bool canFly;
         //sent variables
         private float middleArea; //the middle part of the paper airplane that you hold
         private float frontArea; //the part that goes into the wind/air
@@ -41,19 +42,22 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         private float mass;  //weight of paper airplane (Kg)
 
         //physical attributes of a wing+middle part (half of a plane)
-        public PaperAirplanePhysicsAttributes(int numFolds, float radius, float thickness, float mass)
+        public PaperAirplanePhysicsAttributes(int numFolds, float radius, float thickness, float density, bool canFly)
         {
             //initialize number of folds, radius, thickness, and calculate mass via volume and density from paper type
             this.numberOfFoldds = numFolds;
             this.radius = radius;
             this.thickness = thickness;
-            this.mass = mass;
+            this.mass = density; //need to calculate mass with volume and density
             this.middleArea = -1;
             this.frontArea = -1;
             this.topArea = -1;
+            this.canFly = false;
             middleArea = getMiddleArea();
             topArea = getTopArea();
             frontArea = getFrontArea();
+            mass = getMassOfQuarterCirclularPrism(radius, thickness, density);//calculate as quarter of small piece of circular prism
+            canFly = true;//allow glider flight only after calculations are complete
         }
 
         public override string ToString()
@@ -61,7 +65,6 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
             return $"Paper Airplane Physics Attributes:\n" +
                    $"- Number of Folds: {numberOfFoldds}, Radius: {radius}, Thickness: {thickness}, Mass: {mass}, Middle Area: {middleArea}, Front Area: {frontArea}, Top Area: {topArea}";
         }
-
 
 
         //gets the middle area of one side of plane (there will be two)
@@ -180,22 +183,13 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         {
             return middleArea;
         }
+
+        //helper function to get mass: gets volume of quarter circle (area * thickness) then mutlply by density to get mass
+        private float getMassOfQuarterCirclularPrism(float r, float t, float d)
+        {
+            return (t * Mathf.PI * Mathf.Pow(r, 2) / 4) * d;
+        }
     }
 
-
-/*    public PaperAirplanePhysicsAttributes getPhysicsNumbers(PaperAirplaneGeneSequence genes)
-    {
-        int numFolds = genes.GetNumFolds(); //get number of folds
-        float thickness = genes.GetWidth(); //width for thickness of paper
-        float radius = genes.GetHeight();//height of paper will be constant radius to form pizza shape instead of rectangular for now
-        float mass = getMassOfQuarterCirclularPrism(radius, thickness, genes.GetDensity()); //multiply volume by density to get mass
-        //providing radius and thickness for dimensions, mass, and num of folds for surface area calculations
-        return new PaperAirplanePhysicsAttributes(numFolds, radius, thickness, mass); //return physics calculations
-    }*/
-
-    //gets volume of quarter circle (area * thickness) then mutlply by density to get mass
-    private float getMassOfQuarterCirclularPrism(float r, float t, float d)
-    {
-        return (t * Mathf.PI * Mathf.Pow(r, 2) / 4) * d;
-    }
+    
 }

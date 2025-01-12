@@ -7,7 +7,8 @@ using UnityEngine.InputSystem;
 /**
  * leaderboard manager will receive the winner of each round from gamemanager and will evaluate placement (if glider isn't already on leaderboard)
  * 
- */
+ * @author Grant Benson
+ **/
 public class LeaderboardController :  MonoBehaviour 
 {
     [SerializeField] private List<TextMeshProUGUI> leaderboardText; //leader board entries 1-5

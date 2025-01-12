@@ -2,8 +2,12 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-//manager to follow the leading glider each round; goes back to the start once all gliders land
-//script is meant to be attatched to a camera
+
+/**
+ * manager to follow the leading glider each round (each glider has a camera attatched and updates every interval to follow new leader); goes back to the start once all gliders land
+ * 
+ * @author Grant Benson
+ **/
 public class CameraManager : MonoBehaviour
 {
 

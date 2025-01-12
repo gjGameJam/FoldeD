@@ -1,6 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/**
+ * Game manager handles logic regarding camera/ui updating, paper folding, gene splicing, (all delegated to their own managers) and glider spawning (handled by glider(s))
+ * 
+ * @author Grant Benson
+ **/
 public class GameManager : MonoBehaviour
 {
 

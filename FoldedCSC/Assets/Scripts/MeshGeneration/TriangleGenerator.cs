@@ -9,10 +9,14 @@ using UnityEngine.UIElements;
 //and mesh renderer
 [RequireComponent(typeof(MeshRenderer))]
 
+/**
+ * Triangle mesh generation for a dart glider given a wingspan, length, and paper thickness
+ * glider is three prisms and each prism are 8 triangles (6 of these triangles make up 3 rectangles)
+ * 
+ * @author Grant Benson
+ **/
 public class TriangleGenerator : MonoBehaviour
 {
-    //referenced brackeys vid<3: https://www.youtube.com/watch?v=eJEpeUH1EMg
-
     public Material mat;
     MeshRenderer meshRenderer; //mesh renderer to render material
     MeshFilter meshFilter; //mesh filter to create mesh
@@ -105,7 +109,8 @@ public class TriangleGenerator : MonoBehaviour
         indices.Add(baseIndex + 2);
     }
 
-    // helper function to add a rectangle (two triangles)
+    // helper function to add a rectangle (two triangles)\
+    //referenced brackeys vid<3 to create triangle: https://www.youtube.com/watch?v=eJEpeUH1EMg
     void AddRectangle(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4)
     {
         // First triangle
