@@ -40,4 +40,34 @@ public class GeneSequence
         this.paperWidth = geneSequence[5];
     }
 
+    public float GetNumberOfFolds()
+    {
+        return numberOfFolds;
+    }
+
+    public float GetInitialVelocity()
+    {
+        return initialVelocity;
+    }
+
+    public float GetPaperDensity()
+    {
+        return paperDensity;
+    }
+
+    public float GetPaperLength()
+    {
+        return paperLength;
+    }
+
+    public float GetPaperHeight()
+    {
+        return paperHeight;
+    }
+
+    public float GetPaperWidth()
+    {
+        return paperWidth;
+    }
+
 }

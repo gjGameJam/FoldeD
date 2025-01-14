@@ -46,7 +46,7 @@ public class CameraManager : MonoBehaviour
             {
                 // if the lead glider is different from current one being followed, change camera being used
                 //consider making camera switch function that disables camera in order to not render (improve performance)
-                Debug.Log("following lead glider");
+                //Debug.Log("following lead glider");
                 cam = newLeadGlider.GetComponent<Camera>();//get camera of newLeadGlider could be .GetComponentInChildren<Camera>();
             }
 
