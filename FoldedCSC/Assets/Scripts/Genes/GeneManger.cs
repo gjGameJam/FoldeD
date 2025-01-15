@@ -12,50 +12,87 @@ using UnityEngine.SceneManagement;
  **/
 public class GeneManger : MonoBehaviour
 {
-
+    GeneSequence BestCompetitor, SecondBestCompetitor = null; //keep track of first and second best gene sequences (init as null)
+    float BestCompetitorDist, SecondBestCompetitorDist = 0;
     private int maxNumberOfFolds = 8;
     private float mutationChance = .5f;
-    private float minThrowSpeed = 5; // m/s
-    private float maxThrowSpeed = 15; // m/s
-    private float minDensity = 600; // kg/m^3
-    private float maxDensity = 1100; // kg/m^3
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private float minThrowSpeed = 5; // (m/s)
+    private float maxThrowSpeed = 15; // (m/s)
+    private float minDensity = 600; // (kg/m^3)
+    private float maxDensity = 1100; // (kg/m^3)
+    private float minPaperDimension = .0001; // (m) paper can easily reach .1 mm thickness in any given direction
+    private float maxPaperDimension = 5; // (m) paper can easily reach 5 m thickness in any given direction
+
+
+    //main function that has all functionality wrapped into it
+    public GeneSequence[] GenerateOffspring(int numberOfChildren)
     {
-        //Debug.Log("gene manager exists");
-        // Initialize two parent gene sequences
-        //testing found bug in get gene at splice and fix resolved problem
-        float[] parent1Genes = { 3, 12.5f, 800f, 0.3f, 0.2f, 0.001f }; // Example values for Parent 1
-        float[] parent2Genes = { 2, 10.0f, 750f, 0.28f, 0.18f, 0.0012f }; // Example values for Parent 2
-
-        GeneSequence parent1 = new GeneSequence(parent1Genes);
-        GeneSequence parent2 = new GeneSequence(parent2Genes);
-
-        // Create an instance of the gene manager and generate offspring
-        GeneSequence[] offspring = GeneratePaperAirplaneOffspring(parent1, parent2, 5); // Generate 5 offspring
-
-        // Print out the results
-        for (int i = 0; i < offspring.Length; i++)
+        //competitors will be null on the first round so generate random gene sequences to return
+        if (BestCompetitor == null)
         {
-            Debug.Log($"Offspring {i + 1}:");
-            Debug.Log($"  Number of Folds: {offspring[i].GetNumberOfFolds()}");
-            Debug.Log($"  Initial Velocity: {offspring[i].GetInitialVelocity()}");
-            Debug.Log($"  Paper Density: {offspring[i].GetPaperDensity()}");
-            Debug.Log($"  Paper Length: {offspring[i].GetPaperLength()}");
-            Debug.Log($"  Paper Height: {offspring[i].GetPaperHeight()}");
-            Debug.Log($"  Paper Width: {offspring[i].GetPaperWidth()}");
-            //Console.WriteLine();
+            //if best competitor doesn't exist, generate random valid gene sequence
+            BestCompetitor = GetRandomGeneSequence();
+        }
+        if (SecondBestCompetitor == null)
+        {
+            //if second best competitor doesn't exist, generate random valid gene sequence
+            SecondBestCompetitor = GetRandomGeneSequence();
+        }
+
+        //now best and second best competitors exist
+        GeneSequence[] offspring = GeneratePaperAirplaneOffspring(BestCompetitor, SecondBestCompetitor, numberOfChildren); // Generate numberOfChildren offspring
+
+        //     // Print out the results
+        //     for (int i = 0; i < offspring.Length; i++)
+        //     {
+        //         Debug.Log($"Offspring {i + 1}:");
+        //         Debug.Log($"  Number of Folds: {offspring[i].GetNumberOfFolds()}");
+        //         Debug.Log($"  Initial Velocity: {offspring[i].GetInitialVelocity()}");
+        //         Debug.Log($"  Paper Density: {offspring[i].GetPaperDensity()}");
+        //         Debug.Log($"  Paper Length: {offspring[i].GetPaperLength()}");
+        //         Debug.Log($"  Paper Height: {offspring[i].GetPaperHeight()}");
+        //         Debug.Log($"  Paper Width: {offspring[i].GetPaperWidth()}");
+        //         //Console.WriteLine();
+        //     }
+    }
+
+    //helper function to generate genetic diversity on round one by randomizing gene values within valid range
+    private GeneSequence GetRandomGeneSequence()
+    {
+        //generate random, valid numbers using ranges
+        int numberOfFolds = Random.Range(0, maxNumberOfFolds + 1); //added one to int because it is exclusive (unlike floats)
+        float throwSpeed = Random.Range(minThrowSpeed, maxThrowSpeed);
+        float density = Random.Range(minDensity, maxDensity);
+        float length = Random.Range(minPaperDimension, maxPaperDimension);
+        float width = Random.Range(minPaperDimension, maxPaperDimension);
+        float height = Random.Range(minPaperDimension, maxPaperDimension);
+        //GeneSequence(int numberOfFolds, float initialVelocity, float paperDensity, float paperLength, float paperHeight, float paperWidth)
+        return new GeneSequence(numberOfFolds, throwSpeed, density, length, width, height);
+    }
+
+    //function for game manager to call to update best competitors upon glider crash
+    void UpdateBestCompetitor(GeneSequence geneRep, float distTravelled)
+    {
+        //update best competitor if it travelled further than previous best competitor
+        if (distTravelled > BestCompetitorDist)
+        {
+            BestCompetitor = geneRep;
+            BestCompetitorDist = distTravelled;
+            return; //return early
+        }
+
+        //update second best competitor if it travelled further than previous second best competitor
+        if (distTravelled > SecondBestCompetitorDist)
+        {
+            SecondBestCompetitor = geneRep;
+            SecondBestCompetitorDist = distTravelled;
+            return; //return early
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
 
-    }
-
-    //main function of gene manger accepts two gene sequences and specified number of children with spliced genes of parents (keeps parent 1 in next generation to ensure no loss)
-    public GeneSequence[] GeneratePaperAirplaneOffspring(GeneSequence parent1, GeneSequence parent2, int numChildren)
+    //main helper function of gene manger accepts two gene sequences and specified number of children with spliced genes of parents (keeps parent 1 in next generation to ensure no loss)
+    private GeneSequence[] GeneratePaperAirplaneOffspring(GeneSequence parent1, GeneSequence parent2, int numChildren)
     {
         GeneSequence[] returnPlanes = new GeneSequence[numChildren]; //create array to return
         returnPlanes[0] = parent1;//add top competitor back to ensure no loss in fitness score between rounds/generations
@@ -69,8 +106,9 @@ public class GeneManger : MonoBehaviour
         return returnPlanes; //returns array of gene sequences to be used in glider instantiation
     }
 
+
     //helper function to get gene sequence given two sequences and a splice point
-    GeneSequence GetGeneAtSplicePoint(GeneSequence parent1, GeneSequence parent2, int splicePoint)
+    private GeneSequence GetGeneAtSplicePoint(GeneSequence parent1, GeneSequence parent2, int splicePoint)
     {
         // convert parent1 and parent2 gene arrays to lists for easier manipulation
         float[] parent1Genes = parent1.geneSequence;
@@ -96,6 +134,7 @@ public class GeneManger : MonoBehaviour
         return new GeneSequence(MutateArray(combined));
     }
 
+
     //helper function to mutate gene float array before initialization as gene sequence
     float[] MutateArray(float[] nonMutated)
     {
@@ -111,13 +150,11 @@ public class GeneManger : MonoBehaviour
                 {
                     mutated[0] = nonMutated[0] - 1; //decrement if result will be 0 or greater
                 }
-                
             }
             else
             {
                 mutated[0] = Clamp(nonMutated[0] + 1, 0, maxNumberOfFolds);
             }
-            
         }
         else
         {
@@ -131,9 +168,8 @@ public class GeneManger : MonoBehaviour
             if (CanMutate())
             {
                 toBeAdded = toBeAdded * UnityEngine.Random.Range(.9f, 1.1f);
-                if (i  == 1) //clamp initial velocity to numbers that a human throw could realistically achieve
+                if (i == 1) //clamp initial velocity to numbers that a human throw could realistically achieve
                 {
-                    
                     toBeAdded = Clamp(toBeAdded, minThrowSpeed, maxThrowSpeed);
                 }
                 else if (i == 2) //clamp paper density to achievable range of everyday pulp based papers
@@ -142,7 +178,6 @@ public class GeneManger : MonoBehaviour
                 }
                 //consider clamping paper dimensions to achievable bounds
             }
-
             //add to mutated array regardless if mutation took place
             mutated[i] = toBeAdded;
         }
