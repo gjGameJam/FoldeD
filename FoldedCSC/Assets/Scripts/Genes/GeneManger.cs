@@ -20,7 +20,7 @@ public class GeneManger : MonoBehaviour
     private float maxThrowSpeed = 15; // (m/s)
     private float minDensity = 600; // (kg/m^3)
     private float maxDensity = 1100; // (kg/m^3)
-    private float minPaperDimension = .0001; // (m) paper can easily reach .1 mm thickness in any given direction
+    private float minPaperDimension = .0001f; // (m) paper can easily reach .1 mm thickness in any given direction
     private float maxPaperDimension = 5; // (m) paper can easily reach 5 m thickness in any given direction
 
 
@@ -54,18 +54,20 @@ public class GeneManger : MonoBehaviour
         //         Debug.Log($"  Paper Width: {offspring[i].GetPaperWidth()}");
         //         //Console.WriteLine();
         //     }
+
+        return offspring;
     }
 
     //helper function to generate genetic diversity on round one by randomizing gene values within valid range
     private GeneSequence GetRandomGeneSequence()
     {
         //generate random, valid numbers using ranges
-        int numberOfFolds = Random.Range(0, maxNumberOfFolds + 1); //added one to int because it is exclusive (unlike floats)
-        float throwSpeed = Random.Range(minThrowSpeed, maxThrowSpeed);
-        float density = Random.Range(minDensity, maxDensity);
-        float length = Random.Range(minPaperDimension, maxPaperDimension);
-        float width = Random.Range(minPaperDimension, maxPaperDimension);
-        float height = Random.Range(minPaperDimension, maxPaperDimension);
+        int numberOfFolds = UnityEngine.Random.Range(0, maxNumberOfFolds + 1); //added one to int because it is exclusive (unlike floats)
+        float throwSpeed = UnityEngine.Random.Range(minThrowSpeed, maxThrowSpeed);
+        float density = UnityEngine.Random.Range(minDensity, maxDensity);
+        float length = UnityEngine.Random.Range(minPaperDimension, maxPaperDimension);
+        float width = UnityEngine.Random.Range(minPaperDimension, maxPaperDimension);
+        float height = UnityEngine.Random.Range(minPaperDimension, maxPaperDimension);
         //GeneSequence(int numberOfFolds, float initialVelocity, float paperDensity, float paperLength, float paperHeight, float paperWidth)
         return new GeneSequence(numberOfFolds, throwSpeed, density, length, width, height);
     }
