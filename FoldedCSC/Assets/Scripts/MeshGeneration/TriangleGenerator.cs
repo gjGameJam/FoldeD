@@ -39,6 +39,7 @@ public class TriangleGenerator : MonoBehaviour
 
     void CreateDartPlaneModel(float wingspan, float length, float paperThickness)
     {
+        //consider adding offsets to all vector3s from transform's position such that model doesn't spawn at origin (in use)
         Vector3 nose = new Vector3(length, 0, 0);
         Vector3 wingAdditionalLength = new Vector3(length / 11, 0, 0); //a little bit of length to cover up corners of rudder peeking through
         Vector3 back = new Vector3(0, 0, 0);
