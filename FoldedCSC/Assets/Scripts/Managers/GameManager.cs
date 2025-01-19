@@ -11,9 +11,10 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private Vector3 startingPos; //the starting position for all paper plane spawns
     private List<GameObject> activeGliders = new List<GameObject>(); // keep track all spawned paper airplanes
-    [SerializeField] private GameObject gliderCameraTest;
+    [SerializeField] private GameObject gliderCameraTest; //glider prefab to spawn
     [SerializeField] private LeaderboardController leaderBoardScript; //controls leaderboard
     [SerializeField] private DistanceGraphing distanceGraphScript; //controls leaderboard
+    [SerializeField] private GeneManger geneManager; //controls genetics
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -44,12 +45,14 @@ public class GameManager : MonoBehaviour
 
     }//END OF TESTING SECTION to make sure dynamic adjustment of UI works
 
+    //updates leaderboard controller and distance graphing each time data is available
     void AddResultsToUI(string gliderName, int generationNum, float distanceTravelled)
     {
         //update leaderboard with text
         leaderBoardScript.AddToLeaderboard(gliderName, generationNum, distanceTravelled);
         //update distance graph with new distance
         distanceGraphScript.AddToGraph(distanceTravelled);
+        //look to prevent coupling with camera manager (maybe update from here when leader dies?)
 
     }
 
@@ -94,11 +97,6 @@ public class GameManager : MonoBehaviour
         return farthestGlider;
     }
 
-    //updates leaderboard controller and distance graphing each time data is available
-    void UpdateClientUI()
-    {
-        //look to prevent coupling with camera manager (maybe update from here when leader dies?)
-    }
 
 
 }

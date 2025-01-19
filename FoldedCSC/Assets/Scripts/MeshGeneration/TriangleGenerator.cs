@@ -93,8 +93,8 @@ public class TriangleGenerator : MonoBehaviour
         // assigns material to renderer
         if (meshRenderer != null && meshRenderer.material == null)
         {
-            meshRenderer.material = new Material(Shader.Find("Standard"));
-            meshRenderer.material.SetFloat("_CullMode", (float)UnityEngine.Rendering.CullMode.Off); // Optional: Disable backface culling to render both sides
+            //meshRenderer.material = new Material(Shader.Find("Standard"));
+            meshRenderer.material.SetFloat("_CullMode", (float)UnityEngine.Rendering.CullMode.Back); // Optional: Disable backface culling to render both sides
         }
     }
 
