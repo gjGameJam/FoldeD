@@ -116,11 +116,17 @@ public class GeneManger : MonoBehaviour
         float[] parent1Genes = parent1.geneSequence;
         float[] parent2Genes = parent2.geneSequence;
 
-        // validate splice points
-        if (splicePoint < 0 || splicePoint > parent1Genes.Length || splicePoint > parent2Genes.Length)
+        // validate splice
+        if (splicePoint < 0)
         {
             //Debug.LogError($"Invalid splice point: {splicePoint}");
             return null;
+        }
+
+        if (splicePoint > parent1Genes.Length)
+        {
+            //we know if splice point is after length of gene sequence we can just return mutation of parent1
+            return new GeneSequence(MutateArray(parent1.geneSequence));
         }
 
         // create a new array for the spliced genes

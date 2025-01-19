@@ -15,12 +15,26 @@ public class GameManager : MonoBehaviour
     [SerializeField] private LeaderboardController leaderBoardScript; //controls leaderboard
     [SerializeField] private DistanceGraphing distanceGraphScript; //controls leaderboard
     [SerializeField] private GeneManger geneManager; //controls genetics
+    [SerializeField] private int numGlidersPerRound = 7; //how many gliders should each round have?
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         //creates test glider and adds it to active gliders
         activeGliders.Add(Instantiate(gliderCameraTest, startingPos, Quaternion.identity));
+    }
+
+    private void SpawnGlidersForRound()
+    {
+        //uses gene manager to get array of mutated gene sequences
+        GeneSequence[] genes = geneManager.GenerateOffspring(numGlidersPerRound);
+        //loop through genes, creating new glider and setting its gene sequence
+
+
+        //creates test glider and adds it to active gliders
+        activeGliders.Add(Instantiate(gliderCameraTest, startingPos, Quaternion.identity));
+
+        //now allow the glider to fly once folding calculations and mesh generation are complete
     }
 
     //TESTING SECTION to make sure dynamic adjustment of UI
