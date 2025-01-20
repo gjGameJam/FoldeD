@@ -152,16 +152,13 @@ public class GeneManger : MonoBehaviour
         if (CanMutate())
         {
             //flip a coin on either going up or down one fold
-            if (UnityEngine.Random.Range(0.0f, 1.0f) <= .5f)
+            if (UnityEngine.Random.Range(0.0f, 1.0f) < .5f)
             {
-                if (nonMutated[0] - 1 >= 0)
-                {
-                    mutated[0] = nonMutated[0] - 1; //decrement if result will be 0 or greater
-                }
+                mutated[0] = Clamp(nonMutated[0] - 1, 0, maxNumberOfFolds); //go down one fold (clamp to 0)
             }
             else
             {
-                mutated[0] = Clamp(nonMutated[0] + 1, 0, maxNumberOfFolds);
+                mutated[0] = Clamp(nonMutated[0] + 1, 0, maxNumberOfFolds); //go up one fold (clamp to maxNumberOfFolds)
             }
         }
         else

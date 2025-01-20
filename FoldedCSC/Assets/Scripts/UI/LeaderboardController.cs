@@ -12,7 +12,6 @@ using UnityEngine.InputSystem;
 public class LeaderboardController :  MonoBehaviour 
 {
     [SerializeField] private List<TextMeshProUGUI> leaderboardText; //leader board entries 1-5
-    //private Dictionary<string, FloatIntPair> leaderBoardNameDataPairs = new Dictionary<string, FloatIntPair>();
     public List<LeaderboardEntry> leaderBoardEntries = new List<LeaderboardEntry>();
     private int maxLeaderBoardSize = 5;
 
@@ -32,7 +31,6 @@ public class LeaderboardController :  MonoBehaviour
         }
 
     }
-
 
 
     //function to add leaderboard item (if non-duplicate name)
@@ -66,6 +64,7 @@ public class LeaderboardController :  MonoBehaviour
         UpdateLeaderboardUI();
     }
 
+
     //function to use the leaderBoardEntries list to update leaderboardText list
     private void UpdateLeaderboardUI()
     {
@@ -78,4 +77,4 @@ public class LeaderboardController :  MonoBehaviour
         }
     }
 
-    }
+}

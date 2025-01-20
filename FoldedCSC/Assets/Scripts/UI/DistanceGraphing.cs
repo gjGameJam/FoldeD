@@ -19,16 +19,12 @@ public class DistanceGraphing : MonoBehaviour
     private RectTransform graphContainer;
     [SerializeField] private Sprite dataPointSprite; //sprite for data point (consider using paper airplane)
     private float dataPointSize = 25.0f;
-    int roundNumber = 0; //int to keep track of x position on graph (updates each time data point is added)
-                         //get max height and width of graph
-    float graphHeight, graphWidth, maxFlightDistance; //keep track of graph's size in order to rescale data points appropriately
-
+    float graphHeight, graphWidth; //keep track of graph's size in order to rescale data points appropriately
+    float maxFlightDistance = 100; //max distance at 100 meters for graph
     float dataPointOffsetPerRound = 50.0f;
     float initialDataPointXOffset = 10.0f;
     float initialDataPointYOffset = 7.5f;
-
-    //List<float> testList = new List<float>() { 0.0f, 3.3f, 3.5f, 2.5f, 4.322f, 10.79f, 50.4f, 99.1f, 99.9f };
-    List<float> testList = new List<float>();
+    List<float> testList = new List<float>(); //list to store data points (distance vals)
 
     void Start()
     {
@@ -39,7 +35,6 @@ public class DistanceGraphing : MonoBehaviour
         //Debug.Log($"graph height: {graphHeight}");
         //Debug.Log($"graph width: {graphWidth}");
 
-        maxFlightDistance = 100; //max distance at 100 meters for graph
         RenderDataPoints(testList);
     }
 
