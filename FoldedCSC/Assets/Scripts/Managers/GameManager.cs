@@ -11,7 +11,7 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private Vector3 startingPos; //the starting position for all paper plane spawns
     private List<GameObject> activeGliders = new List<GameObject>(); // keep track all spawned paper airplanes
-    [SerializeField] private GameObject gliderCameraTest; //glider prefab to spawn
+    [SerializeField] private GameObject gliderModel; //glider prefab to spawn
     [SerializeField] private LeaderboardController leaderBoardScript; //controls leaderboard
     [SerializeField] private DistanceGraphing distanceGraphScript; //controls leaderboard
     [SerializeField] private GeneManger geneManager; //controls genetics
@@ -21,26 +21,47 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         //creates test glider and adds it to active gliders
-        activeGliders.Add(Instantiate(gliderCameraTest, startingPos, Quaternion.identity));
+        activeGliders.Add(Instantiate(gliderModel, startingPos, Quaternion.identity));
     }
 
+    //function to spawn set of gliders upon the start of each round
     private void SpawnGlidersForRound()
     {
         //uses gene manager to get array of mutated gene sequences
         GeneSequence[] genes = geneManager.GenerateOffspring(numGlidersPerRound);
         //loop through genes, creating new glider and setting its gene sequence
+        for (int i = 0; i < genes.length; i++)
+        {
 
+            //create glider object at starting point
+            GameObject newGlider = Instantiate(gliderModel, startingPos, Quaternion.identity);
 
-        //creates test glider and adds it to active gliders
-        activeGliders.Add(Instantiate(gliderCameraTest, startingPos, Quaternion.identity));
+            //get the triangle mesh generation script and input dimensions from gene sequence to create model
+            //newGlider.getComponent<TriangleMeshGenerator>().CreateGliderModel(genes[i]., genes[i]., genes[i].);
 
-        //now allow the glider to fly once folding calculations and mesh generation are complete
+            //perform folding calculations from gene sequence to get correct physics numbers
+            //newGlider.getComponent<SemiCircleFoldingAlg>().PerformFoldingCalcs(genes[i].);
+
+            //and add glider as an active glider now that physics and rendering will be handled
+            activeGliders.Add(newGlider);
+
+            //enable movement in glider (disabled by default) now that everything is set
+            //newGlider.genesequence.canfly = true; //now allow the glider to fly once folding calculations and mesh generation are complete
+
+        }
+        //end of loop spawning all gliders
+    }
+
+    //before destroy each glider needs to save distance and gene sequence in gene manager
+    void OnDestroy()
+    {
+        //geneManager.updateBestCompetitor();
     }
 
     //TESTING SECTION to make sure dynamic adjustment of UI
     private float timer = 0f;  // Timer to track time passed
     private float interval = 1.5f;  // Time interval in seconds
-    private float testDist = 5;
+    //private float testDist = 5;
     int testNum = 0;
     // Update is called once per frame
     void Update()
