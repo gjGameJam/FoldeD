@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using static SemiCircleFoldingAlgorithm;
 
 /**
  * Game manager handles logic regarding camera/ui updating, paper folding, gene splicing, (all delegated to their own managers) and glider spawning (handled by glider(s))
@@ -11,7 +12,7 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private Vector3 startingPos; //the starting position for all paper plane spawns
     private List<GameObject> activeGliders = new List<GameObject>(); // keep track all spawned paper airplanes
-    [SerializeField] private GameObject gliderModel; //glider prefab to spawn
+    [SerializeField] private GameObject gliderModel; //glider prefab to spawn (consider strengthening connection)
     [SerializeField] private LeaderboardController leaderBoardScript; //controls leaderboard
     [SerializeField] private DistanceGraphing distanceGraphScript; //controls leaderboard
     [SerializeField] private GeneManger geneManager; //controls genetics
@@ -22,6 +23,7 @@ public class GameManager : MonoBehaviour
     {
         //creates test glider and adds it to active gliders
         activeGliders.Add(Instantiate(gliderModel, startingPos, Quaternion.identity));
+        //Debug.Log("spawnedPlane");
     }
 
     //function to spawn set of gliders upon the start of each round
@@ -30,17 +32,18 @@ public class GameManager : MonoBehaviour
         //uses gene manager to get array of mutated gene sequences
         GeneSequence[] genes = geneManager.GenerateOffspring(numGlidersPerRound);
         //loop through genes, creating new glider and setting its gene sequence
-        for (int i = 0; i < genes.length; i++)
+        for (int i = 0; i < genes.Length; i++)
         {
 
             //create glider object at starting point
             GameObject newGlider = Instantiate(gliderModel, startingPos, Quaternion.identity);
 
-            //get the triangle mesh generation script and input dimensions from gene sequence to create model
-            //newGlider.getComponent<TriangleMeshGenerator>().CreateGliderModel(genes[i]., genes[i]., genes[i].);
+            //perform folding calculations from gene sequence to get correct physics and mesh generation numebers numbers
+            //newGlider.GetComponent<SemiCircleFoldingAlgorithm>().
+            PaperAirplanePhysicsAttributes foldResults = new PaperAirplanePhysicsAttributes(genes[i].GetNumberOfFolds(), genes[i].GetPaperHeight(), genes[i].GetPaperWidth(), genes[i].GetPaperDensity(), false); //(int numFolds, float radius, float thickness, float density, bool canFly
 
-            //perform folding calculations from gene sequence to get correct physics numbers
-            //newGlider.getComponent<SemiCircleFoldingAlg>().PerformFoldingCalcs(genes[i].);
+            //get the triangle mesh generation script and input dimensions from folding algorithm to create model
+            //newGlider.getComponent<TriangleMeshGenerator>().CreateGliderModel(genes[i]., genes[i]., genes[i].);
 
             //and add glider as an active glider now that physics and rendering will be handled
             activeGliders.Add(newGlider);

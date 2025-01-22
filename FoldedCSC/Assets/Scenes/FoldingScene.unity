@@ -754,10 +754,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startingPos: {x: 0, y: 0, z: 0}
-  gliderCameraTest: {fileID: 3667665961188783457, guid: 6d10e887e79198446a7d465e04e9f3e8, type: 3}
+  gliderModel: {fileID: 3667665961188783457, guid: 6d10e887e79198446a7d465e04e9f3e8, type: 3}
   leaderBoardScript: {fileID: 1004462582}
   distanceGraphScript: {fileID: 1846460330}
   geneManager: {fileID: 984579817}
+  numGlidersPerRound: 7
 --- !u!1 &1273111124
 GameObject:
   m_ObjectHideFlags: 0
