@@ -130,10 +130,18 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         }
 
         //nose angle starts at 90 and halves each fold
+        //TODO: change function name to getNoseAngleDegrees
         private float getNoseAngle()
         {
             //angle will halve every fold because sides touch and crease becomes new hypotenuse (or side)
             return NOSE_STARTING_ANGLE * Mathf.Pow((.5f), numberOfFoldds);
+        }
+
+        private float getNoseAngleRadians()
+        {
+            //angle will halve every fold because sides touch and crease becomes new hypotenuse (or side)
+            float noseAngleInDegrees = getNoseAngle();
+            return noseAngleInDegrees * Mathf.Deg2Rad; //multiply by scalar to convert to radians and return result
         }
 
         //gets surface area for one side of front of plane using wingspan x width
@@ -189,11 +197,65 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
             return (t * Mathf.PI * Mathf.Pow(r, 2) / 4) * d;
         }
 
+        // //helper function to get mass of a circular sector
+        // private float getMassOfCircularSector(){
+        //     //since we have already calculated mass via the quarter of circular prism function on start
+        //     //we can merely check if a fold has been performed and divide into two sections per side if so
+        //     if (numberOfFoldds == 0){
+        //         return mass;
+        //     }
+        //     return mass / 2; //now there will be two sections per side
+        // }
+
+
+        //TODO: go over sin and cos functions and ensure radians are being used
+        //function to get center of mass of one side of a glider by creating a triangle with the hypotenuse being the distance to centroid
+        private Vector3 getCenterOfMassOfSide(bool rightSide){
+            float distFromNoseToCentroid = GetDistanceFromTipToCentroid();//will be used as hypotenuse to calculate position
+            float centroidTriangleRadians = getNoseAngleRadians() / 2; //the centroid bisects the actual circular sector (it's in the middle) so angle is halved
+            Vector3 nose = new Vector3(getRadius(), 0, 0); //nose is always radius away from origin
+            //calculate centroid point based on model where back is origin and nose is (radius, 0, 0)
+            float forwardOffset = getRadius() - distFromNoseToCentroid * Mathf.Cos(centroidTriangleRadians); //1 at 0 radians
+            float sideOffset = distFromNoseToCentroid * Mathf.Sin(centroidTriangleRadians); //0 at 0 radians
+            Vector3 wingCentroidPoint = new Vector3(xOffset, 0, sideOffset);
+            Vector3 middleCentroidPoint = new Vector3(xOffset, -sideOffset, 0); //piece is folded down
+            Vector3 noFoldsCentroidPoint = new Vector3(xOffset, sideOffset, 0);//piece not folded down
+            //right side is negative left side is positive
+            if (rightSide){
+                wingCentroidPoint.z = -wingCentroidPoint.z;
+            }
+            
+            //each side will be considered as two circular sectors (the wing and middle) unless folds = 0
+            if (numberOfFoldds == 0){
+                //only one large circular sector sticking up
+                return mass * noFoldsCentroidPoint;
+            }
+            else{
+                //two circular sectors connected by a fold
+                return mass * ((wingCentroidPoint + middleCentroidPoint) / 2);
+            }
+        }
+
+        //helper function to get distance from the center of circlular sector (tip opposite of curved edge) to centroid
+        private float GetDistanceFromTipToCentroid(){
+            //4r/3(theta) * sin(theta/2) is the equation for the distance from the center of circlular sector to the centroid
+            return (4 * getRadius() / 3f) * Mathf.Sin(getNoseAngleRadians() / 2);
+        }
+
+        //helper function to get the length of the arc of the circular sector
+        private float getArcLength(){
+            //radians = ArcLength / Radius; so rearranging this formula gets us:
+            //ArcLength = Radians * radius
+            return getNoseAngleRadians() * getRadius();
+        }
+
+        //getter for radius
         public float getRadius()
         {
             return radius;
         }
 
+        //function to allow flight boolean to be flipped
         public void AllowFlight()
         {
             canFly = true;
