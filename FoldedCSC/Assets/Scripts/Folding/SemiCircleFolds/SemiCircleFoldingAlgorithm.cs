@@ -4,7 +4,6 @@ using UnityEngine;
  * Algorithm to get surface areas of paper airplane such that the piece of paper is a half circle and each wing is a symmetrical quarter circle
  * given a radius and number of folds, provide surface area of each face making contact with air.
  * 
- * 
  * @author Grant Benson
  **/
 public class SemiCircleFoldingAlgorithm : MonoBehaviour
@@ -107,7 +106,7 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         }
 
         //gets the wingspan of one wing given the number of folds and radius
-        private float calculateWingspan()
+        public float calculateWingspan()
         {
 
             //if no folds have occured the wing span will be the thickness of the paper
@@ -158,7 +157,7 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         }
 
         //paper folded upon itself will be around 1.7 times the thickness of the original
-        private float getThicknessFolded()
+        public float getThicknessFolded()
         {
             //thickness of paper increases exponentially per fold
             return thickness * Mathf.Pow(THICKNESS_MULTIPLIER_PER_FOLD, numberOfFoldds);
@@ -188,6 +187,16 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         private float getMassOfQuarterCirclularPrism(float r, float t, float d)
         {
             return (t * Mathf.PI * Mathf.Pow(r, 2) / 4) * d;
+        }
+
+        public float getRadius()
+        {
+            return radius;
+        }
+
+        public void AllowFlight()
+        {
+            canFly = true;
         }
     }
 

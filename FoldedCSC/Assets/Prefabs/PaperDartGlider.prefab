@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 1489213215795729671}
   - component: {fileID: 2481357894296071648}
   - component: {fileID: -4133622300978173518}
+  - component: {fileID: -4443400922333364532}
   m_Layer: 0
   m_Name: PaperDartGlider
   m_TagString: Untagged
@@ -28,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 3667665961188783457}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 1.29, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -101,6 +102,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mat: {fileID: 2100000, guid: cc3a5089a19ed1f44b87e90a40cb58a7, type: 2}
+--- !u!114 &-4443400922333364532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3667665961188783457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d75f65a28ba45f4bb05c0416222b7c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6862386086287405279
 GameObject:
   m_ObjectHideFlags: 0

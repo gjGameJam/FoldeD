@@ -181,7 +181,10 @@ public class GeneManger : MonoBehaviour
                 {
                     toBeAdded = Clamp(toBeAdded, minDensity, maxDensity);
                 }
-                //consider clamping paper dimensions to achievable bounds
+                else if (i <= 5 && i >= 3)
+                {
+                    toBeAdded = Clamp(toBeAdded, minPaperDimension, maxPaperDimension); //clamping paper dimensions to achievable bounds
+                }
             }
             //add to mutated array regardless if mutation took place
             mutated[i] = toBeAdded;

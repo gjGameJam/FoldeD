@@ -34,29 +34,41 @@ public class TriangleGenerator : MonoBehaviour
         //Create3DTriangularPrism(new Vector3(0, 0, 0), new Vector3(0, 0, 1), new Vector3(1, 0, 0), .3f);
 
         //creates dart model with wingspan of 1 length of 1 and paper thicknes of .25
-        CreateDartPlaneModel(1, 1, .25f);
+        CreateDartPlaneModel(1, 1, .25f, false);
     }
 
-    void CreateDartPlaneModel(float wingspan, float length, float paperThickness)
+    public void CreateDartPlaneModel(float wingspan, float length, float paperThickness, bool unfolded)
     {
-        //consider adding offsets to all vector3s from transform's position such that model doesn't spawn at origin (in use)
-        Vector3 nose = new Vector3(length, 0, 0);
-        Vector3 wingAdditionalLength = new Vector3(length / 11, 0, 0); //a little bit of length to cover up corners of rudder peeking through
-        Vector3 back = new Vector3(0, 0, 0);
-        Vector3 rightWingTip = new Vector3(0, 0, wingspan);
-        Vector3 leftWingTip = new Vector3(0, 0, -wingspan);
-        Vector3 bottomRudderTip = new Vector3(0, -wingspan, 0);
+        //if paper is unfolded it will be a simple triangular prism of paper sticking up
+        if (unfolded)
+        {
+            //make simple model representing no folds
+            Vector3 nose = new Vector3(length, 0, 0);
+            Vector3 back = new Vector3(0, 0, 0);
+            Vector3 bottomRudderTip = new Vector3(0, length, 0); //rudder will be on top with full length if unfolded
+        }
+        else //if paper is folded it will form a dart model
+        {
+            //consider adding offsets to all vector3s from transform's position such that model doesn't spawn at origin (in use)
+            Vector3 nose = new Vector3(length, 0, 0);
+            Vector3 wingAdditionalLength = new Vector3(length / 11, 0, 0); //a little bit of length to cover up corners of rudder peeking through
+            Vector3 back = new Vector3(0, 0, 0);
+            Vector3 rightWingTip = new Vector3(0, 0, wingspan);
+            Vector3 leftWingTip = new Vector3(0, 0, -wingspan);
+            Vector3 bottomRudderTip = new Vector3(0, -wingspan, 0);
 
-        // Offset for prism height (y is up so half of that for both sides in each dirction creates space)
-        Vector3 prismVerticalOffset = new Vector3(0, paperThickness / 2, 0);
-        Vector3 prismHorizontalOffset = new Vector3(0, 0, paperThickness / 3); //there's only one rudder but we still want it to be thin so it doesn't stick out
+            // Offset for prism height (y is up so half of that for both sides in each dirction creates space)
+            Vector3 prismVerticalOffset = new Vector3(0, paperThickness / 2, 0);
+            Vector3 prismHorizontalOffset = new Vector3(0, 0, paperThickness / 3); //there's only one rudder but we still want it to be thin so it doesn't stick out
 
-        //add right wing
-        Create3DTriangularPrism(back, rightWingTip, nose + wingAdditionalLength, prismVerticalOffset);
-        //add bottom wing
-        Create3DTriangularPrism(back, bottomRudderTip, nose, prismHorizontalOffset);
-        //add left wing
-        Create3DTriangularPrism(nose + wingAdditionalLength, leftWingTip, back, prismVerticalOffset);
+            //add right wing
+            Create3DTriangularPrism(back, rightWingTip, nose + wingAdditionalLength, prismVerticalOffset);
+            //add bottom wing
+            Create3DTriangularPrism(back, bottomRudderTip, nose, prismHorizontalOffset);
+            //add left wing
+            Create3DTriangularPrism(nose + wingAdditionalLength, leftWingTip, back, prismVerticalOffset);
+        }
+
     }
 
     //creates two dimensional triangle mesh between provided points

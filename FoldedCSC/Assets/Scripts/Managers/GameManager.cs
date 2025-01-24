@@ -39,27 +39,32 @@ public class GameManager : MonoBehaviour
             GameObject newGlider = Instantiate(gliderModel, startingPos, Quaternion.identity);
 
             //perform folding calculations from gene sequence to get correct physics and mesh generation numebers numbers
-            //newGlider.GetComponent<SemiCircleFoldingAlgorithm>().
             PaperAirplanePhysicsAttributes foldResults = new PaperAirplanePhysicsAttributes(genes[i].GetNumberOfFolds(), genes[i].GetPaperHeight(), genes[i].GetPaperWidth(), genes[i].GetPaperDensity(), false); //(int numFolds, float radius, float thickness, float density, bool canFly
 
-            //get the triangle mesh generation script and input dimensions from folding algorithm to create model
-            //newGlider.getComponent<TriangleMeshGenerator>().CreateGliderModel(genes[i]., genes[i]., genes[i].);
+            //use the triangle mesh generation script and input dimensions from folding algorithm to create triangle mesh model of paper
+            if (genes[i].GetNumberOfFolds() == 0)
+            {
+                newGlider.GetComponent<TriangleGenerator>().CreateDartPlaneModel(foldResults.calculateWingspan(), foldResults.getRadius(), foldResults.getThicknessFolded(), true); //create unfolded model
+            }
+            else
+            {
+                newGlider.GetComponent<TriangleGenerator>().CreateDartPlaneModel(foldResults.calculateWingspan(), foldResults.getRadius(), foldResults.getThicknessFolded(), false); //create folded model
+            }
 
-            //and add glider as an active glider now that physics and rendering will be handled
+            //need to assign gene sequence gene[i] and PaperAirplanePhysicsAttributes foldResults to each glider
+            //TODO: assign gene sequence and fold results to glider object
+
+            //finally add glider as an active glider now that physics, genes, and rendering are handled
             activeGliders.Add(newGlider);
 
-            //enable movement in glider (disabled by default) now that everything is set
-            //newGlider.genesequence.canfly = true; //now allow the glider to fly once folding calculations and mesh generation are complete
+            //enable movement in glider (disabled by default) now that everything is set and glider is active
+            foldResults.AllowFlight(); //now allow the glider to fly once folding calculations and mesh generation are complete
 
         }
         //end of loop spawning all gliders
     }
 
-    //before destroy each glider needs to save distance and gene sequence in gene manager
-    void OnDestroy()
-    {
-        //geneManager.updateBestCompetitor();
-    }
+
 
     //TESTING SECTION to make sure dynamic adjustment of UI
     private float timer = 0f;  // Timer to track time passed
