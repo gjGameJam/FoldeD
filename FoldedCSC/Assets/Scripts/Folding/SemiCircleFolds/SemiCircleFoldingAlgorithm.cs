@@ -32,7 +32,7 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
 
         private float radius;
         private float thickness;
-        private int numberOfFoldds;
+        private int numberOfFolds;
         private bool canFly;
         //sent variables
         private float middleArea; //the middle part of the paper airplane that you hold
@@ -44,7 +44,7 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         public PaperAirplanePhysicsAttributes(int numFolds, float radius, float thickness, float density, bool canFly)
         {
             //initialize number of folds, radius, thickness, and calculate mass via volume and density from paper type
-            this.numberOfFoldds = numFolds;
+            this.numberOfFolds = numFolds;
             this.radius = radius;
             this.thickness = thickness;
             this.mass = density; //need to calculate mass with volume and density
@@ -62,7 +62,7 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         public override string ToString()
         {
             return $"Paper Airplane Physics Attributes:\n" +
-                   $"- Number of Folds: {numberOfFoldds}, Radius: {radius}, Thickness: {thickness}, Mass: {mass}, Middle Area: {middleArea}, Front Area: {frontArea}, Top Area: {topArea}";
+                   $"- Number of Folds: {numberOfFolds}, Radius: {radius}, Thickness: {thickness}, Mass: {mass}, Middle Area: {middleArea}, Front Area: {frontArea}, Top Area: {topArea}";
         }
 
 
@@ -70,7 +70,7 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         private float getMiddleArea()
         {
             float quarterCircleArea = getSAofCircleOfRadius(radius) / 4; //(pi * r^2 / 4) is quarter circle
-            float fractionOfAreaDueToFolds = Mathf.Pow((.5f), numberOfFoldds); //(1 / 2) ^ num folds becuase the area will get halved every time with the pizza model
+            float fractionOfAreaDueToFolds = Mathf.Pow((.5f), numberOfFolds); //(1 / 2) ^ num folds becuase the area will get halved every time with the pizza model
             return quarterCircleArea * fractionOfAreaDueToFolds; //quarter circle * fractionOfAreaDueToFolds will be the circles area given number of folds
         }
 
@@ -78,7 +78,7 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         private float getTopArea()
         {
             //wings do not exist if there have been no folds yet
-            switch (numberOfFoldds)
+            switch (numberOfFolds)
             {
                 case 0:
                     return thickness * radius; //if there are no folds the wing area will be the side of the paper (thickness * length of paper which will be radius here) pointing up
@@ -110,13 +110,13 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         {
 
             //if no folds have occured the wing span will be the thickness of the paper
-            switch (numberOfFoldds)
+            switch (numberOfFolds)
             {
                 case 0:
                     //Debug.Log("zero folds!");
                     return thickness; //if there are no folds the wing span will just be the thickness of the paper
                 default:
-                    float noseAngleInDegrees = getNoseAngle();
+                    float noseAngleInDegrees = getNoseAngleDegrees();
                     //Debug.Log("num of folds for wing span " + numberOfFoldds);
                     // Convert angle to radians because Mathf.Cos expects radians
                     float NoseAngleInRadians = noseAngleInDegrees * Mathf.Deg2Rad;
@@ -130,17 +130,16 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         }
 
         //nose angle starts at 90 and halves each fold
-        //TODO: change function name to getNoseAngleDegrees
-        private float getNoseAngle()
+        private float getNoseAngleDegrees()
         {
             //angle will halve every fold because sides touch and crease becomes new hypotenuse (or side)
-            return NOSE_STARTING_ANGLE * Mathf.Pow((.5f), numberOfFoldds);
+            return NOSE_STARTING_ANGLE * Mathf.Pow((.5f), numberOfFolds);
         }
 
         private float getNoseAngleRadians()
         {
             //angle will halve every fold because sides touch and crease becomes new hypotenuse (or side)
-            float noseAngleInDegrees = getNoseAngle();
+            float noseAngleInDegrees = getNoseAngleDegrees();
             return noseAngleInDegrees * Mathf.Deg2Rad; //multiply by scalar to convert to radians and return result
         }
 
@@ -148,7 +147,7 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         private float getFrontArea()
         {
             //if no folds have occured the frontal area will be half of thickness * radius / 2 (half of upright piece of paper)
-            switch (numberOfFoldds)
+            switch (numberOfFolds)
             {
                 case 0:
                     //Debug.Log("zero folds!");
@@ -168,7 +167,7 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         public float getThicknessFolded()
         {
             //thickness of paper increases exponentially per fold
-            return thickness * Mathf.Pow(THICKNESS_MULTIPLIER_PER_FOLD, numberOfFoldds);
+            return thickness * Mathf.Pow(THICKNESS_MULTIPLIER_PER_FOLD, numberOfFolds);
         }
 
         public readonly float getMass()
@@ -217,16 +216,16 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
             //calculate centroid point based on model where back is origin and nose is (radius, 0, 0)
             float forwardOffset = getRadius() - distFromNoseToCentroid * Mathf.Cos(centroidTriangleRadians); //1 at 0 radians
             float sideOffset = distFromNoseToCentroid * Mathf.Sin(centroidTriangleRadians); //0 at 0 radians
-            Vector3 wingCentroidPoint = new Vector3(xOffset, 0, sideOffset);
-            Vector3 middleCentroidPoint = new Vector3(xOffset, -sideOffset, 0); //piece is folded down
-            Vector3 noFoldsCentroidPoint = new Vector3(xOffset, sideOffset, 0);//piece not folded down
+            Vector3 wingCentroidPoint = new Vector3(forwardOffset, 0, sideOffset);
+            Vector3 middleCentroidPoint = new Vector3(forwardOffset, -sideOffset, 0); //piece is folded down
+            Vector3 noFoldsCentroidPoint = new Vector3(forwardOffset, sideOffset, 0);//piece not folded down
             //right side is negative left side is positive
             if (rightSide){
                 wingCentroidPoint.z = -wingCentroidPoint.z;
             }
             
             //each side will be considered as two circular sectors (the wing and middle) unless folds = 0
-            if (numberOfFoldds == 0){
+            if (numberOfFolds == 0){
                 //only one large circular sector sticking up
                 return mass * noFoldsCentroidPoint;
             }
