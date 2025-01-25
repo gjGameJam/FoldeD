@@ -28,17 +28,16 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
     {
         private const float THICKNESS_MULTIPLIER_PER_FOLD = 1.7f;
         private const float NOSE_STARTING_ANGLE = 90.0f;
-
-
+        //variables that are received and dont change
         private float radius;
         private float thickness;
         private int numberOfFolds;
-        private bool canFly;
         //sent variables
         private float middleArea; //the middle part of the paper airplane that you hold
         private float frontArea; //the part that goes into the wind/air
         private float topArea;  //the part that is visible from the top down view
         private float mass;  //weight of paper airplane (Kg)
+        private bool canFly; //ability to fly or not
 
         //physical attributes of a wing+middle part (half of a plane)
         public PaperAirplanePhysicsAttributes(int numFolds, float radius, float thickness, float density, bool canFly)
@@ -46,146 +45,131 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
             //initialize number of folds, radius, thickness, and calculate mass via volume and density from paper type
             this.numberOfFolds = numFolds;
             this.radius = radius;
-            this.thickness = thickness;
-            this.mass = density; //need to calculate mass with volume and density
+            this.thickness = thickness; //this is the thickness of the paper itself, not the entire glider (which is usually multiple folds thick)
+            this.mass = -1; //need to calculate mass with volume and density
             this.middleArea = -1;
             this.frontArea = -1;
             this.topArea = -1;
             this.canFly = false;
-            middleArea = getMiddleArea();
-            topArea = getTopArea();
-            frontArea = getFrontArea();
+            middleArea = calculateMiddleArea();
+            topArea = calculateTopArea();
+            frontArea = calculateFrontArea();
             mass = getMassOfQuarterCirclularPrism(radius, thickness, density);//calculate as quarter of small piece of circular prism
             canFly = true;//allow glider flight only after calculations are complete
         }
 
-        public override string ToString()
+        //calculates the middle area of one side of plane (there will be two)
+        //since the paper is oriented up (such that the middle SA is largest on 0 folds) no base case exists
+        private float calculateMiddleArea()
         {
-            return $"Paper Airplane Physics Attributes:\n" +
-                   $"- Number of Folds: {numberOfFolds}, Radius: {radius}, Thickness: {thickness}, Mass: {mass}, Middle Area: {middleArea}, Front Area: {frontArea}, Top Area: {topArea}";
+            //TODO: potentially consider interaction of fold connecting wings?
+            float quarterCircleArea = getSAofQuarterCircle(radius); // pi * r^2 / 4 is quarter circle
+            float fractionOfAreaDueToFolds = getHalvingOfPaperFromFolds(); //(.5) ^ (# of folds) because the area will get halved every time with the pizza (quarter circular sector) model
+            return quarterCircleArea * fractionOfAreaDueToFolds; //quarter circle * fractionOfAreaDueToFolds will be the middle area (held as thrown) given number of folds
         }
 
-
-        //gets the middle area of one side of plane (there will be two)
-        private float getMiddleArea()
-        {
-            float quarterCircleArea = getSAofCircleOfRadius(radius) / 4; //(pi * r^2 / 4) is quarter circle
-            float fractionOfAreaDueToFolds = Mathf.Pow((.5f), numberOfFolds); //(1 / 2) ^ num folds becuase the area will get halved every time with the pizza model
-            return quarterCircleArea * fractionOfAreaDueToFolds; //quarter circle * fractionOfAreaDueToFolds will be the circles area given number of folds
-        }
-
-        //gets the wing area of one side of plane (there will be two)
-        private float getTopArea()
+        //calculates the wing area of one side of plane (there will be two)
+        private float calculateTopArea()
         {
             //wings do not exist if there have been no folds yet
             switch (numberOfFolds)
             {
+                //the wing section won't be equal to the middle section only when folds = 0
                 case 0:
                     return thickness * radius; //if there are no folds the wing area will be the side of the paper (thickness * length of paper which will be radius here) pointing up
                 default:
-                    //top of wing and bottom of wing (the body) will always be symmetrical (assuming at least one fold has been made)
-                    return getMiddleArea();
+                    return getMiddleArea(); //top of wing and bottom of wing (the body) will always be symmetrical (assuming at least one fold has been made)
             }
-
         }
 
-        private float getSAofCircleOfRadius(float radius)
+        //calculates surface area for one side of front of plane using wingspan and thickness
+        private float calculateFrontArea()
+        {
+            switch (numberOfFolds)
+            {
+                case 0: //if there are no folds the frontal area is thickness * radius (just like top area)
+                    //Debug.Log("zero folds!");
+                    return thickness * radius; 
+                default: //if there are folds, the frontal area is wingspan * thickness * 2 (because front section has two wings worth of air exposure)
+                    return getThicknessFolded() * calculateWingspan() * 2; //thickness * wingspan is the area exposed to forward air by one side (there are two)
+            }
+        }
+
+        //helper function that gets surface area of quarter circle of param radius
+        private float getSAofQuarterCircle(float radius)
         {
             //PI * R^2 = circle surface area
-            return Mathf.PI * Mathf.Pow(radius, 2);
+            return Mathf.PI * Mathf.Pow(radius, 2) / 4; // circle surface area / 4 = quarter circle surfce area
         }
 
-        // AAS Formula: Given a nose angle and radius, calculate the opposite side length.
+        // Given a nose angle and radius, calculate the opposite side length
         public float GetOppositeSideLength(float noseAngleRadians, float radius)
         {
-            // Use the sine of the nose angle to calculate the opposite side.
-            float oppositeSide = radius * Mathf.Sin(noseAngleRadians);
-
-            // Return the calculated opposite side length.
-            return oppositeSide;
+            // Use the sine of the nose angle to calculate the opposite side
+            float oppositeSide = radius * Mathf.Sin(noseAngleRadians);//goes from 0 at 0 to radius at pi/2 radians
+            return oppositeSide; // Return the calculated opposite side length
         }
 
         //gets the wingspan of one wing given the number of folds and radius
         public float calculateWingspan()
         {
-
             //if no folds have occured the wing span will be the thickness of the paper
             switch (numberOfFolds)
             {
-                case 0:
-                    //Debug.Log("zero folds!");
-                    return thickness; //if there are no folds the wing span will just be the thickness of the paper
+                case 0: //because paper is upright at folds = 0, the wingspan will just be the paper's thickness
+                    return thickness; //return depth of sheet (don't need to divide because there is one each side)
                 default:
-                    float noseAngleInDegrees = getNoseAngleDegrees();
-                    //Debug.Log("num of folds for wing span " + numberOfFoldds);
-                    // Convert angle to radians because Mathf.Cos expects radians
-                    float NoseAngleInRadians = noseAngleInDegrees * Mathf.Deg2Rad;
-
                     // The opposite side of a triangle formed by the hypotenuse (which will always be the radius for pizza example), nose angle, and right angle will be the wingspan
-                    float wingspan = GetOppositeSideLength(NoseAngleInRadians, radius);
-
-                    //wingspan is the longest distance from the middle to the wing edge
-                    return wingspan;
+                    float wingspan = GetOppositeSideLength(getNoseAngleRadians(), radius);
+                    return wingspan; //wingspan is the distance from the middle to the wing edge
             }
+        }
+
+        //helper function for decay relationship of halving of paper due to folds
+        private float getHalvingOfPaperFromFolds(){
+            return Mathf.Pow((.5f), numberOfFolds); //.5^(# of folds)
         }
 
         //nose angle starts at 90 and halves each fold
         private float getNoseAngleDegrees()
         {
             //angle will halve every fold because sides touch and crease becomes new hypotenuse (or side)
-            return NOSE_STARTING_ANGLE * Mathf.Pow((.5f), numberOfFolds);
+            return NOSE_STARTING_ANGLE * getHalvingOfPaperFromFolds();
         }
 
+        //nose angle starts at pi/2 and halves each fold
         private float getNoseAngleRadians()
         {
             //angle will halve every fold because sides touch and crease becomes new hypotenuse (or side)
-            float noseAngleInDegrees = getNoseAngleDegrees();
-            return noseAngleInDegrees * Mathf.Deg2Rad; //multiply by scalar to convert to radians and return result
-        }
-
-        //gets surface area for one side of front of plane using wingspan x width
-        private float getFrontArea()
-        {
-            //if no folds have occured the frontal area will be half of thickness * radius / 2 (half of upright piece of paper)
-            switch (numberOfFolds)
-            {
-                case 0:
-                    //Debug.Log("zero folds!");
-                    return thickness * radius / 2; //if there are no folds the frontal area is thickness * radius / 2 (because this is for each side)
-                default:
-                    //frontal area is the area that goes into the air with forward movement
-                    //therefore it will be the thickness of the paper multiplied by the length exposed
-                    //there will be two segments (middle and wing) of equal thickness and length (wingspan)
-                    float wingSpan = calculateWingspan();
-                    //thickness of wing multiplied by wingspan is the area exposed to forward air by one side
-                    float segmentArea = getThicknessFolded() * wingSpan;
-                    return segmentArea;
-            }
+            return NOSE_STARTING_ANGLE * getHalvingOfPaperFromFolds() * Mathf.Deg2Rad; //same as degree function but multiply by scalar to convert to radians
         }
 
         //paper folded upon itself will be around 1.7 times the thickness of the original
         public float getThicknessFolded()
         {
-            //thickness of paper increases exponentially per fold
-            return thickness * Mathf.Pow(THICKNESS_MULTIPLIER_PER_FOLD, numberOfFolds);
+            return thickness * Mathf.Pow(THICKNESS_MULTIPLIER_PER_FOLD, numberOfFolds); //thickness of paper increases exponentially per fold
         }
 
+        //getter for mass
         public readonly float getMass()
         {
             return mass;
         }
 
-        public readonly float getWingAreaTop()
+        //getter for the surface area of the top of glider
+        public readonly float getTopArea()
         {
             return topArea;
         }
 
-        public readonly float getFrontalArea()
+        //getter for the surface area of the top of glider
+        public readonly float getFrontArea()
         {
             return frontArea;
         }
 
-        public readonly float getSideArea()
+        //getter for the surface area of the top of glider
+        public readonly float getMiddleArea()
         {
             return middleArea;
         }
@@ -194,6 +178,62 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         private float getMassOfQuarterCirclularPrism(float r, float t, float d)
         {
             return (t * Mathf.PI * Mathf.Pow(r, 2) / 4) * d;
+        }
+
+        //function to get center of mass of one side of a glider by creating a triangle with the hypotenuse being the distance to centroid
+        private Vector3 getCenterOfMassOfSide(bool rightSide){
+            float distFromNoseToCentroid = GetDistanceFromTipToCentroid();//will be used as hypotenuse to calculate position
+            float centroidTheta = getNoseAngleRadians() / 2; //the centroid bisects the actual circular sector (it's in the middle) so angle is halved
+            //calculate centroid point based on model where back is origin and nose is (radius, 0, 0)
+            float forwardOffset = radius - distFromNoseToCentroid * Mathf.Cos(centroidTheta); //1 at 0 radians
+            float sideOffset = distFromNoseToCentroid * Mathf.Sin(centroidTheta); //0 at 0 radians
+            Vector3 nose = new Vector3(radius, 0, 0); //nose is always radius away from origin
+            Vector3 wingCentroidPoint = new Vector3(forwardOffset, 0, sideOffset);
+            Vector3 middleCentroidPoint = new Vector3(forwardOffset, -sideOffset, 0); //piece is folded down
+            Vector3 noFoldsCentroidPoint = new Vector3(forwardOffset, sideOffset, 0);//piece not folded down
+            //right side is negative left side is positive
+            if (rightSide){
+                wingCentroidPoint.z = -wingCentroidPoint.z;
+            }
+            //each side will be considered as two circular sectors (the wing and middle) unless folds = 0
+            switch (numberOfFolds)
+            {
+                case 0: 
+                    return noFoldsCentroidPoint; //only one large circular sector sticking up
+                default: 
+                    //two circular sectors connected by a fold that are equal mass
+                    return (wingCentroidPoint + middleCentroidPoint) / 2; //calculate average pos then return
+            }
+        }
+
+        //helper function to get distance from the center of circlular sector (tip opposite of curved edge) to centroid
+        private float GetDistanceFromTipToCentroid(){
+            //4r/3(theta) * sin(theta/2) is the equation for the distance from the center of circlular sector to the centroid
+            float theta = getNoseAngleRadians(); // theta in radians
+            return (4 * radius / (3f * theta)) * Mathf.Sin(theta / 2f);
+        }
+
+        //helper function to get the length of the arc of the circular sector
+        //radians = ArcLength / Radius; so rearranging this formula gets us: ArcLength = Radians * radius
+        private float getArcLength(){
+            return getNoseAngleRadians() * radius;
+        }
+
+        //function to allow flight boolean to be flipped
+        public void AllowFlight()
+        {
+            canFly = true;
+        }
+
+        //returns if the folding alg is complete and the glider is flight ready
+        public bool CanFly(){
+            return canFly;
+        }
+
+        public override string ToString()
+        {
+            return $"Paper Airplane Physics Attributes:\n" +
+                   $"- Number of Folds: {numberOfFolds}, Radius: {radius}, Thickness: {thickness}, Mass: {mass}, Middle Area: {middleArea}, Front Area: {frontArea}, Top Area: {topArea}";
         }
 
         // //helper function to get mass of a circular sector
@@ -206,60 +246,13 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         //     return mass / 2; //now there will be two sections per side
         // }
 
+        //todo: replace the usage of this as just radius because it is set then not changed
+        // //getter for radius
+        // public float getRadius()
+        // {
+        //     return radius;
+        // }
 
-        //TODO: go over sin and cos functions and ensure radians are being used
-        //function to get center of mass of one side of a glider by creating a triangle with the hypotenuse being the distance to centroid
-        private Vector3 getCenterOfMassOfSide(bool rightSide){
-            float distFromNoseToCentroid = GetDistanceFromTipToCentroid();//will be used as hypotenuse to calculate position
-            float centroidTriangleRadians = getNoseAngleRadians() / 2; //the centroid bisects the actual circular sector (it's in the middle) so angle is halved
-            Vector3 nose = new Vector3(getRadius(), 0, 0); //nose is always radius away from origin
-            //calculate centroid point based on model where back is origin and nose is (radius, 0, 0)
-            float forwardOffset = getRadius() - distFromNoseToCentroid * Mathf.Cos(centroidTriangleRadians); //1 at 0 radians
-            float sideOffset = distFromNoseToCentroid * Mathf.Sin(centroidTriangleRadians); //0 at 0 radians
-            Vector3 wingCentroidPoint = new Vector3(forwardOffset, 0, sideOffset);
-            Vector3 middleCentroidPoint = new Vector3(forwardOffset, -sideOffset, 0); //piece is folded down
-            Vector3 noFoldsCentroidPoint = new Vector3(forwardOffset, sideOffset, 0);//piece not folded down
-            //right side is negative left side is positive
-            if (rightSide){
-                wingCentroidPoint.z = -wingCentroidPoint.z;
-            }
-            
-            //each side will be considered as two circular sectors (the wing and middle) unless folds = 0
-            if (numberOfFolds == 0){
-                //only one large circular sector sticking up
-                return mass * noFoldsCentroidPoint;
-            }
-            else{
-                //two circular sectors connected by a fold
-                return mass * ((wingCentroidPoint + middleCentroidPoint) / 2);
-            }
-        }
-
-        //helper function to get distance from the center of circlular sector (tip opposite of curved edge) to centroid
-        private float GetDistanceFromTipToCentroid(){
-            //4r/3(theta) * sin(theta/2) is the equation for the distance from the center of circlular sector to the centroid
-            return (4 * getRadius() / 3f) * Mathf.Sin(getNoseAngleRadians() / 2);
-        }
-
-        //helper function to get the length of the arc of the circular sector
-        private float getArcLength(){
-            //radians = ArcLength / Radius; so rearranging this formula gets us:
-            //ArcLength = Radians * radius
-            return getNoseAngleRadians() * getRadius();
-        }
-
-        //getter for radius
-        public float getRadius()
-        {
-            return radius;
-        }
-
-        //function to allow flight boolean to be flipped
-        public void AllowFlight()
-        {
-            canFly = true;
-        }
     }
-
     
 }
