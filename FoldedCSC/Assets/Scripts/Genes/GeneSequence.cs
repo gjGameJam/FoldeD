@@ -40,6 +40,25 @@ public class GeneSequence
         this.paperWidth = geneSequence[5];
     }
 
+    // Clone method to create deep copy of object (not shared)
+    public GeneSequence Clone()
+    {
+        // instantiate new object with same values
+        GeneSequence clone = new GeneSequence(
+            this.numberOfFolds,
+            this.initialVelocity,
+            this.paperDensity,
+            this.paperLength,
+            this.paperHeight,
+            this.paperWidth
+        );
+
+        // deep copy the geneSequence array to ensure it's not shared
+        clone.geneSequence = (float[])this.geneSequence.Clone();
+        //then return copy
+        return clone;
+    }
+
     public int GetNumberOfFolds()
     {
         return (int)numberOfFolds;

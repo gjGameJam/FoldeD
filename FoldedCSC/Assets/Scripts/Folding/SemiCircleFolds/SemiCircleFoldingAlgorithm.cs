@@ -225,6 +225,12 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
             canFly = true;
         }
 
+        //getter for radius
+        public float getRadius()
+        {
+            return radius;
+        }
+
         //returns if the folding alg is complete and the glider is flight ready
         public bool CanFly(){
             return canFly;

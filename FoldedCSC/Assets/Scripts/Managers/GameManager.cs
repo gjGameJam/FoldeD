@@ -38,7 +38,7 @@ public class GameManager : MonoBehaviour
             //create glider object at starting point
             GameObject newGlider = Instantiate(gliderModel, startingPos, Quaternion.identity);
 
-            //perform folding calculations from gene sequence to get correct physics and mesh generation numebers numbers
+            //perform folding calculations from gene sequence to get correct physics and mesh generation numbers
             PaperAirplanePhysicsAttributes foldResults = new PaperAirplanePhysicsAttributes(genes[i].GetNumberOfFolds(), genes[i].GetPaperHeight(), genes[i].GetPaperWidth(), genes[i].GetPaperDensity(), false); //(int numFolds, float radius, float thickness, float density, bool canFly
 
             //use the triangle mesh generation script and input dimensions from folding algorithm to create triangle mesh model of paper
@@ -51,8 +51,10 @@ public class GameManager : MonoBehaviour
                 newGlider.GetComponent<TriangleGenerator>().CreateDartPlaneModel(foldResults.calculateWingspan(), foldResults.getRadius(), foldResults.getThicknessFolded(), false); //create folded model
             }
 
-            //need to assign gene sequence gene[i] and PaperAirplanePhysicsAttributes foldResults to each glider
-            //TODO: assign gene sequence and fold results to glider object
+            //need to assign gene sequence gene[i] and foldResults to each glider
+            GliderFlight flightCalcs = newGlider.GetComponent<GliderFlight>();
+            flightCalcs.SetPhysicsResults(foldResults);
+            flightCalcs.SetGeneSequence(genes[i]);
 
             //finally add glider as an active glider now that physics, genes, and rendering are handled
             activeGliders.Add(newGlider);
