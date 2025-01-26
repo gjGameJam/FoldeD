@@ -27,20 +27,22 @@ public class GeneManger : MonoBehaviour
     //main function that has all functionality wrapped into it
     public GeneSequence[] GenerateOffspring(int numberOfChildren)
     {
+        GeneSequence[] offspring = new GeneSequence[numberOfChildren];
         //competitors will be null on the first round so generate random gene sequences to return
-        if (BestCompetitor == null)
+        if (BestCompetitor == null || SecondBestCompetitor == null)
         {
-            //if best competitor doesn't exist, generate random valid gene sequence
-            BestCompetitor = GetRandomGeneSequence();
-        }
-        if (SecondBestCompetitor == null)
-        {
-            //if second best competitor doesn't exist, generate random valid gene sequence
-            SecondBestCompetitor = GetRandomGeneSequence();
-        }
+            //if best competitor doesn't exist, generate random valid gene sequence for all gliders (first round)
+            for (int i = 0; i < numberOfChildren; i++)
+            {
+                offspring[i] = GetRandomGeneSequence();
 
-        //now best and second best competitors exist
-        GeneSequence[] offspring = GeneratePaperAirplaneOffspring(BestCompetitor, SecondBestCompetitor, numberOfChildren); // Generate numberOfChildren offspring
+            }
+        }
+        else
+        {
+            //now best and second best competitors exist
+            offspring = GeneratePaperAirplaneOffspring(BestCompetitor, SecondBestCompetitor, numberOfChildren); // Generate numberOfChildren offspring
+        }
 
         //     // Print out the results
         //     for (int i = 0; i < offspring.Length; i++)

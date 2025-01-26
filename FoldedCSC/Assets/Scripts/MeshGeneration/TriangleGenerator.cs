@@ -24,7 +24,7 @@ public class TriangleGenerator : MonoBehaviour
     List<int> indices = new List<int>();
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         //gets mesh renderer and filter
         meshRenderer = GetComponent<MeshRenderer>();
@@ -34,11 +34,14 @@ public class TriangleGenerator : MonoBehaviour
         //Create3DTriangularPrism(new Vector3(0, 0, 0), new Vector3(0, 0, 1), new Vector3(1, 0, 0), .3f);
 
         //creates dart model with wingspan of 1 length of 1 and paper thicknes of .25
-        CreateDartPlaneModel(1, 1, .25f, false);
+        //CreateDartPlaneModel(1, 1, .25f, false);
     }
 
+    //creates triangular prisms to represent glider model
+    //TODO: debug this function to figure out why big ah crosses are being made
     public void CreateDartPlaneModel(float wingspan, float length, float paperThickness, bool unfolded)
     {
+        Debug.Log($"wingspan of {wingspan} length of {length} with thickness of {paperThickness}");
         //if paper is unfolded it will be a simple triangular prism of paper sticking up
         if (unfolded)
         {
@@ -46,6 +49,7 @@ public class TriangleGenerator : MonoBehaviour
             Vector3 nose = new Vector3(length, 0, 0);
             Vector3 back = new Vector3(0, 0, 0);
             Vector3 bottomRudderTip = new Vector3(0, length, 0); //rudder will be on top with full length if unfolded
+            //TODO: add model for unfolded quarter circle
         }
         else //if paper is folded it will form a dart model
         {
@@ -67,6 +71,23 @@ public class TriangleGenerator : MonoBehaviour
             Create3DTriangularPrism(back, bottomRudderTip, nose, prismHorizontalOffset);
             //add left wing
             Create3DTriangularPrism(nose + wingAdditionalLength, leftWingTip, back, prismVerticalOffset);
+
+            // create mesh and recalculate normal and bounds for new model of three triangular prisms
+            Mesh prismMesh = new Mesh();
+            prismMesh.SetVertices(vertices);
+            prismMesh.SetIndices(indices, MeshTopology.Triangles, 0);
+            prismMesh.RecalculateNormals(); //ensure lighting is correct
+            prismMesh.RecalculateBounds(); // ensure the bounding box is correct
+
+            // assigns new prism to mesh filter's mesh
+            meshFilter.mesh = prismMesh;
+
+            // assigns material to renderer
+            if (meshRenderer != null && meshRenderer.material == null)
+            {
+                //meshRenderer.material = new Material(Shader.Find("Standard"));
+                meshRenderer.material.SetFloat("_CullMode", (float)UnityEngine.Rendering.CullMode.Back); // Optional: Disable backface culling to render both sides
+            }
         }
 
     }
@@ -91,23 +112,6 @@ public class TriangleGenerator : MonoBehaviour
         AddRectangle(Point1Top, Point2Top, Point2Bottom, Point1Bottom); // Side 1
         AddRectangle(Point2Top, Point3Top, Point3Bottom, Point2Bottom); // Side 2
         AddRectangle(Point3Top, Point1Top, Point1Bottom, Point3Bottom); // Side 3
-
-        // create mesh
-        Mesh prismMesh = new Mesh();
-        prismMesh.SetVertices(vertices);
-        prismMesh.SetIndices(indices, MeshTopology.Triangles, 0);
-        prismMesh.RecalculateNormals(); //ensure lighting is correct
-        prismMesh.RecalculateBounds(); // ensure the bounding box is correct
-
-        // assigns new prism to mesh filter's mesh
-        meshFilter.mesh = prismMesh;
-
-        // assigns material to renderer
-        if (meshRenderer != null && meshRenderer.material == null)
-        {
-            //meshRenderer.material = new Material(Shader.Find("Standard"));
-            meshRenderer.material.SetFloat("_CullMode", (float)UnityEngine.Rendering.CullMode.Back); // Optional: Disable backface culling to render both sides
-        }
     }
 
     // Helper function to add a triangle

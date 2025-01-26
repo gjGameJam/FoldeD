@@ -22,8 +22,10 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         //creates test glider and adds it to active gliders
-        activeGliders.Add(Instantiate(gliderModel, startingPos, Quaternion.identity));
-        //Debug.Log("spawnedPlane");
+        //activeGliders.Add(Instantiate(gliderModel, startingPos, Quaternion.identity));
+        Debug.Log("tryingToSpawnGliders");
+        SpawnGlidersForRound();
+        Debug.Log("spawnedGliders!!!:)");
     }
 
     //function to spawn set of gliders upon the start of each round
