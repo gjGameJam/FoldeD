@@ -34,7 +34,8 @@ public class TriangleGenerator : MonoBehaviour
         //Create3DTriangularPrism(new Vector3(0, 0, 0), new Vector3(0, 0, 1), new Vector3(1, 0, 0), .3f);
 
         //creates dart model with wingspan of 1 length of 1 and paper thicknes of .25
-        //CreateDartPlaneModel(1, 1, .25f, false);
+        //CreateDartPlaneModel(UnityEngine.Random.Range(.05f, 2), UnityEngine.Random.Range(.05f, 2), UnityEngine.Random.Range(.05f, 8), false);
+        //CreateDartPlaneModel(4, 2, 8f, false);
     }
 
     //creates triangular prisms to represent glider model
@@ -49,7 +50,10 @@ public class TriangleGenerator : MonoBehaviour
             Vector3 nose = new Vector3(length, 0, 0);
             Vector3 back = new Vector3(0, 0, 0);
             Vector3 bottomRudderTip = new Vector3(0, length, 0); //rudder will be on top with full length if unfolded
-            //TODO: add model for unfolded quarter circle
+            // Offset for prism height (y is up so half of that for both sides in each dirction creates space)
+            Vector3 prismHorizontalOffset = new Vector3(0, 0, paperThickness / 3);
+            // model for unfolded quarter circle (just a triangle for model)
+            Create3DTriangularPrism(back, nose, bottomRudderTip, prismHorizontalOffset);
         }
         else //if paper is folded it will form a dart model
         {
@@ -65,30 +69,33 @@ public class TriangleGenerator : MonoBehaviour
             Vector3 prismVerticalOffset = new Vector3(0, paperThickness / 2, 0);
             Vector3 prismHorizontalOffset = new Vector3(0, 0, paperThickness / 3); //there's only one rudder but we still want it to be thin so it doesn't stick out
 
+
+            //TODO: fix wings such that all are triangular prisms (some are rectangles right now and make the models look like crosses)
             //add right wing
             Create3DTriangularPrism(back, rightWingTip, nose + wingAdditionalLength, prismVerticalOffset);
             //add bottom wing
-            Create3DTriangularPrism(back, bottomRudderTip, nose, prismHorizontalOffset);
+            Create3DTriangularPrism(back, bottomRudderTip, nose, prismHorizontalOffset);//TODO: want to offset to bottom of wing triangular prisms/improve model
             //add left wing
             Create3DTriangularPrism(nose + wingAdditionalLength, leftWingTip, back, prismVerticalOffset);
-
-            // create mesh and recalculate normal and bounds for new model of three triangular prisms
-            Mesh prismMesh = new Mesh();
-            prismMesh.SetVertices(vertices);
-            prismMesh.SetIndices(indices, MeshTopology.Triangles, 0);
-            prismMesh.RecalculateNormals(); //ensure lighting is correct
-            prismMesh.RecalculateBounds(); // ensure the bounding box is correct
-
-            // assigns new prism to mesh filter's mesh
-            meshFilter.mesh = prismMesh;
-
-            // assigns material to renderer
-            if (meshRenderer != null && meshRenderer.material == null)
-            {
-                //meshRenderer.material = new Material(Shader.Find("Standard"));
-                meshRenderer.material.SetFloat("_CullMode", (float)UnityEngine.Rendering.CullMode.Back); // Optional: Disable backface culling to render both sides
-            }
         }
+
+        // create mesh and recalculate normal and bounds for new model of three triangular prisms
+        Mesh prismMesh = new Mesh();
+        prismMesh.SetVertices(vertices);
+        prismMesh.SetIndices(indices, MeshTopology.Triangles, 0);
+        prismMesh.RecalculateNormals(); //ensure lighting is correct
+        prismMesh.RecalculateBounds(); // ensure the bounding box is correct
+
+        // assigns new prism to mesh filter's mesh
+        meshFilter.mesh = prismMesh;
+
+        // assigns material to renderer
+        if (meshRenderer != null && meshRenderer.material == null)
+        {
+            //meshRenderer.material = new Material(Shader.Find("Standard"));
+             meshRenderer.material.SetFloat("_CullMode", (float)UnityEngine.Rendering.CullMode.Back); // Optional: Disable backface culling to render both sides
+        }
+        
 
     }
 

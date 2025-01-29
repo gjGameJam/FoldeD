@@ -22,6 +22,7 @@ public class GeneManger : MonoBehaviour
     private float maxDensity = 1100; // (kg/m^3)
     private float minPaperDimension = .0001f; // (m) paper can easily reach .1 mm thickness in any given direction
     private float maxPaperDimension = 5; // (m) paper can easily reach 5 m thickness in any given direction
+    private float maxPaperThickness = .5f; // (m) paper can be up to .5 meters thick
 
 
     //main function that has all functionality wrapped into it
@@ -68,10 +69,10 @@ public class GeneManger : MonoBehaviour
         float throwSpeed = UnityEngine.Random.Range(minThrowSpeed, maxThrowSpeed);
         float density = UnityEngine.Random.Range(minDensity, maxDensity);
         float length = UnityEngine.Random.Range(minPaperDimension, maxPaperDimension);
-        float width = UnityEngine.Random.Range(minPaperDimension, maxPaperDimension);
+        float width = UnityEngine.Random.Range(minPaperDimension, maxPaperThickness);
         float height = UnityEngine.Random.Range(minPaperDimension, maxPaperDimension);
         //GeneSequence(int numberOfFolds, float initialVelocity, float paperDensity, float paperLength, float paperHeight, float paperWidth)
-        return new GeneSequence(numberOfFolds, throwSpeed, density, length, width, height);
+        return new GeneSequence(numberOfFolds, throwSpeed, density, length, height, width);
     }
 
     //function for game manager to call to update best competitors upon glider crash

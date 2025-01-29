@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 using static SemiCircleFoldingAlgorithm;
 
 /**
@@ -23,9 +24,9 @@ public class GameManager : MonoBehaviour
     {
         //creates test glider and adds it to active gliders
         //activeGliders.Add(Instantiate(gliderModel, startingPos, Quaternion.identity));
-        Debug.Log("tryingToSpawnGliders");
+        //Debug.Log("tryingToSpawnGliders");
         SpawnGlidersForRound();
-        Debug.Log("spawnedGliders!!!:)");
+        //Debug.Log("spawnedGliders!!!:)");
     }
 
     //function to spawn set of gliders upon the start of each round
@@ -39,7 +40,7 @@ public class GameManager : MonoBehaviour
 
             //create glider object at starting point
             GameObject newGlider = Instantiate(gliderModel, startingPos, Quaternion.identity);
-
+            Debug.Log($"Genes: #folds {genes[i].GetNumberOfFolds()} radius of {genes[i].GetPaperHeight()} with thickness of {genes[i].GetPaperWidth()}");
             //perform folding calculations from gene sequence to get correct physics and mesh generation numbers
             PaperAirplanePhysicsAttributes foldResults = new PaperAirplanePhysicsAttributes(genes[i].GetNumberOfFolds(), genes[i].GetPaperHeight(), genes[i].GetPaperWidth(), genes[i].GetPaperDensity(), false); //(int numFolds, float radius, float thickness, float density, bool canFly
 
