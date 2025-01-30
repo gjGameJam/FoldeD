@@ -42,7 +42,7 @@ public class TriangleGenerator : MonoBehaviour
     //TODO: debug this function to figure out why big ah crosses are being made
     public void CreateDartPlaneModel(float wingspan, float length, float paperThickness, bool unfolded)
     {
-        Debug.Log($"wingspan of {wingspan} length of {length} with thickness of {paperThickness}");
+        Debug.Log($"Model: wingspan of {wingspan} length of {length} with thickness of {paperThickness}");
         //if paper is unfolded it will be a simple triangular prism of paper sticking up
         if (unfolded)
         {

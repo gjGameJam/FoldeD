@@ -145,9 +145,14 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         }
 
         //paper folded upon itself will be around 1.7 times the thickness of the original
+        //so paper with 0 or 1 folds will just be thickness because first fold forms wing instead of overlapping
         public float getThicknessFolded()
         {
-            return thickness * Mathf.Pow(THICKNESS_MULTIPLIER_PER_FOLD, numberOfFolds); //thickness of paper increases exponentially per fold
+            if (numberOfFolds <= 1)
+            {
+                return thickness;
+            }
+            return thickness * Mathf.Pow(THICKNESS_MULTIPLIER_PER_FOLD, numberOfFolds - 1); //thickness of paper increases exponentially per fold after first fold
         }
 
         //getter for mass
