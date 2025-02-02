@@ -76,7 +76,7 @@ public class GeneManger : MonoBehaviour
     }
 
     //function for game manager to call to update best competitors upon glider crash
-    void UpdateBestCompetitor(GeneSequence geneRep, float distTravelled)
+    public void UpdateBestCompetitor(GeneSequence geneRep, float distTravelled)
     {
         //update best competitor if it travelled further than previous best competitor
         if (distTravelled > BestCompetitorDist)

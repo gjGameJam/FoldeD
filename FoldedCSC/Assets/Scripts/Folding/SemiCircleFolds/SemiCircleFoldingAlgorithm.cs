@@ -225,10 +225,10 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         }
 
         //function to allow flight boolean to be flipped
-        public void AllowFlight()
+/*        public void AllowFlight()
         {
             canFly = true;
-        }
+        }*/
 
         //getter for radius
         public float getRadius()

@@ -56,14 +56,16 @@ public class GameManager : MonoBehaviour
 
             //need to assign gene sequence gene[i] and foldResults to each glider
             GliderFlight flightCalcs = newGlider.GetComponent<GliderFlight>();
-            flightCalcs.SetPhysicsResults(foldResults);
-            flightCalcs.SetGeneSequence(genes[i]);
+            flightCalcs.SetPhysicsResults(foldResults); //save surface area, mass, COM, etc for glider flight calculations
+            flightCalcs.setGeneManager(geneManager);//set the gene manager same for everyone
+            flightCalcs.SetGeneSequence(genes[i]); //each glider has unique gene sequence
 
             //finally add glider as an active glider now that physics, genes, and rendering are handled
             activeGliders.Add(newGlider);
 
             //enable movement in glider (disabled by default) now that everything is set and glider is active
-            foldResults.AllowFlight(); //now allow the glider to fly once folding calculations and mesh generation are complete
+            //already happens in constructor after calcs are finished
+            //foldResults.AllowFlight(); //now allow the glider to fly once folding calculations and mesh generation are complete
 
         }
         //end of loop spawning all gliders
