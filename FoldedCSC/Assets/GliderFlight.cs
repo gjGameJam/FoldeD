@@ -1,3 +1,4 @@
+using System;
 using Unity.VisualScripting;
 using UnityEngine;
 using static SemiCircleFoldingAlgorithm;
@@ -17,12 +18,19 @@ public class GliderFlight : MonoBehaviour
 
     float startingFitness;
     float fitnessScore;
+    private Action<GliderFlight, string, float> onDestroyCallback;
+
+    //function passed in by game manager to update ui/camera on death
+    public void SetOnDestroyCallback(Action<GliderFlight, string, float> callback)
+    {
+        onDestroyCallback = callback; //calls HandleGliderDestroyed function in game manager
+    }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        float lifeSpan = 2.5f; //use random lifespan to test camera manager
-        //Destroy(transform.parent.gameObject, lifeSpan); //destroy this object after lifespan
+        float maxLifeSpan = 8f; // Set lifespan before destruction
+        Destroy(gameObject, UnityEngine.Random.Range(2, maxLifeSpan)); // Destroys this GameObject after max lifeSpan seconds
         // Get the parent of the current GameObject and set fitness score to x value on start
         startingFitness = transform.position.x;
         //TODO: get rigid body of glider
@@ -32,18 +40,19 @@ public class GliderFlight : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //TESTING: using gene sequence.GetInitialVelocity() to create linear flight paths 
-        float lifeSpan = 2.5f; // Set lifespan before destruction
-        Destroy(gameObject, lifeSpan); // Destroys this GameObject after lifeSpan seconds
-
-        
+        //TESTING: using gene sequence.GetInitialVelocity() to create linear flight paths
         if (physNums.CanFly())
         {
+            //Debug.Log("glider fly :)");
             //add movement to parent position
             float xMovementAmount = geneSeq.GetInitialVelocity() * Time.deltaTime;
             float yMovementAmount = 2 * Time.deltaTime;
             transform.position += new Vector3(xMovementAmount, -yMovementAmount, 0);
         }
+/*        else
+        {
+            Debug.Log("glider cannot fly :(");
+        }*/
 
         //END OF TESTING: camera should follow lead glider
     }
@@ -68,8 +77,11 @@ public class GliderFlight : MonoBehaviour
     //before destroy each glider needs to save distance and gene sequence in gene manager
     void OnDestroy() //consider using OnDisable() in order to perform update a bit before memory cleanup
     {
+        float finalFitnessScore = getFitnessScore();
         //update gene manager with the gene sequence and fitness score (distance travelled in x direction)
-        geneManager.UpdateBestCompetitor(geneSeq, getFitnessScore());
+        geneManager.UpdateBestCompetitor(geneSeq, finalFitnessScore);
+        onDestroyCallback(this, geneSeq.getName(), finalFitnessScore); // Pass the glider flight instance to the callback to be destroyed
+        
     }
 
     public void setGeneManager(GeneManger geneM)

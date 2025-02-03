@@ -14,7 +14,7 @@ public class GeneManger : MonoBehaviour
 {
     GeneSequence BestCompetitor, SecondBestCompetitor = null; //keep track of first and second best gene sequences (init as null)
     float BestCompetitorDist, SecondBestCompetitorDist = 0;
-    private int maxNumberOfFolds = 8;
+    private int maxNumberOfFolds = 6;
     private float mutationChance = .5f;
     private float minThrowSpeed = 5; // (m/s)
     private float maxThrowSpeed = 15; // (m/s)

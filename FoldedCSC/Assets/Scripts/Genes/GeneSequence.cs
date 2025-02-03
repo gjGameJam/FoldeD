@@ -59,6 +59,12 @@ public class GeneSequence
         return clone;
     }
 
+    //function to get random name based on hashed gene sequence
+    public string getName()
+    {
+        return "timothyGene";
+    }
+
     public int GetNumberOfFolds()
     {
         return (int)numberOfFolds;

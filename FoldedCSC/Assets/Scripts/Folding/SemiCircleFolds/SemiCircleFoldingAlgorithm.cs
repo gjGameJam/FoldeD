@@ -55,7 +55,7 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
             topArea = calculateTopArea();
             frontArea = calculateFrontArea();
             mass = getMassOfQuarterCirclularPrism(radius, thickness, density);//calculate as quarter of small piece of circular prism
-            canFly = true;//allow glider flight only after calculations are complete
+            this.canFly = true;//allow glider flight only after calculations are complete
         }
 
         //calculates the middle area of one side of plane (there will be two)

@@ -56,6 +56,7 @@ public class GameManager : MonoBehaviour
 
             //need to assign gene sequence gene[i] and foldResults to each glider
             GliderFlight flightCalcs = newGlider.GetComponent<GliderFlight>();
+            flightCalcs.SetOnDestroyCallback(HandleGliderDestroyed);
             flightCalcs.SetPhysicsResults(foldResults); //save surface area, mass, COM, etc for glider flight calculations
             flightCalcs.setGeneManager(geneManager);//set the gene manager same for everyone
             flightCalcs.SetGeneSequence(genes[i]); //each glider has unique gene sequence
@@ -71,6 +72,20 @@ public class GameManager : MonoBehaviour
         //end of loop spawning all gliders
     }
 
+    //function gliders call when they crash
+    private void HandleGliderDestroyed(GliderFlight glider, string gliderName, float fitnessScore)
+    {
+        Debug.Log($"glider {gliderName} died with fitness score of {fitnessScore}");
+        //if best for the round then add to the UI
+        //AddResultsToUI(gliderName, 0, fitnessScore);
+        activeGliders.Remove(glider.gameObject);//removes the gameobject of the crashed glider script
+
+        if (activeGliders.Count == 0)
+        {
+            //UpdateUI();
+            SpawnGlidersForRound();
+        }
+    }
 
 
     //TESTING SECTION to make sure dynamic adjustment of UI
@@ -92,6 +107,17 @@ public class GameManager : MonoBehaviour
             // Reset the timer to reuse
             timer = 0f;
         }
+/*        if (activeGliders.Count == 0)
+        {
+            Debug.Log("gspawn new round");
+            SpawnGlidersForRound();
+        }
+        else
+        {
+            Debug.Log($"glider count current {activeGliders.Count}");
+            // Clean up null references in case objects were destroyed
+            activeGliders.RemoveAll(obj => obj == null);
+        }*/
 
     }//END OF TESTING SECTION to make sure dynamic adjustment of UI works
 
