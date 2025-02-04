@@ -13,6 +13,7 @@ using UnityEngine.SceneManagement;
 public class GeneManger : MonoBehaviour
 {
     GeneSequence BestCompetitor, SecondBestCompetitor = null; //keep track of first and second best gene sequences (init as null)
+    string bestCompName;
     float BestCompetitorDist, SecondBestCompetitorDist = 0;
     private int maxNumberOfFolds = 6;
     private float mutationChance = .5f;
@@ -81,6 +82,7 @@ public class GeneManger : MonoBehaviour
         //update best competitor if it travelled further than previous best competitor
         if (distTravelled > BestCompetitorDist)
         {
+            //set sequence and distance travelled
             BestCompetitor = geneRep;
             BestCompetitorDist = distTravelled;
             return; //return early
@@ -93,6 +95,19 @@ public class GeneManger : MonoBehaviour
             SecondBestCompetitorDist = distTravelled;
             return; //return early
         }
+    }
+
+    //public function to get name of top competitor
+    public string getBestCompetitorName(){
+        if (BestCompetitor != null){
+            return BestCompetitor.getName();
+        }
+        return "N/A"
+    }
+
+    //public function to get name of top competitor
+    public float getBestCompetitorDistance(){
+        return BestCompetitorDist;
     }
 
 

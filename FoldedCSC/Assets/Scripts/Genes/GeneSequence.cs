@@ -1,4 +1,6 @@
 using UnityEngine;
+#include <cstdint>
+#include <cstring>
 
 /**
  * each glider will have a gene sequence that stores relevant information for the gene manager to use
@@ -15,6 +17,9 @@ public class GeneSequence
     private float paperHeight; //measurement for how tall piece of paper is (y length in meters)
     private float paperWidth; //measurement for how thick piece of paper is (z length in meters)
     public float[] geneSequence;//array to store/splice all gene values
+
+    private const uint FNV1A_OFFSET_BASIS = 2166136261;  // FNV-1a 32-bit offset basis
+    private const uint FNV1A_FNV_32_PRIME = 16777619;  // FNV-1a prime
 
     // Constructor
     public GeneSequence(int numberOfFolds, float initialVelocity, float paperDensity, float paperLength, float paperHeight, float paperWidth)
@@ -59,10 +64,82 @@ public class GeneSequence
         return clone;
     }
 
+    //data storing color, animals, and verbs for hash val conversion to name
+    private static readonly string[] colors = { 
+        "Red", "Blue", "Green", "Yellow", "Purple", "Orange", "Black", "White", "Cyan", "Magenta", 
+        "Crimson", "Teal", "Lime", "Azure", "Maroon", "Gold", "Silver", "Bronze", "Turquoise", "Olive", 
+        "Violet", "Amber", "Indigo", "Lavender", "Ruby", "Emerald", "Sapphire", "Rose", "Pearl", "Coral", 
+        "Ivory", "Beige", "Navy", "Charcoal", "Mint", "Fuchsia", "Salmon", "Burgundy", "Lilac", "Mustard"
+    };
+    private static readonly string[] animals = { 
+        "Falcon", "Tiger", "Wolf", "Eagle", "Shark", "Panther", "Cobra", "Fox", "Hawk", "Lynx", 
+        "Leopard", "Jaguar", "Viper", "Bison", "Ocelot", "Griffon", "Hyena", "Raven", "Stallion", "Bull", 
+        "Cheetah", "Cougar", "Dragon", "Hound", "Kraken", "Lizard", "Mongoose", "Orca", "Puma", "Scorpion", 
+        "Tarantula", "Wolverine", "Coyote", "Gazelle", "Jackal", "Condor", "Pelican", "Barracuda", "Bobcat", "Mastiff"
+    };
+    private static readonly string[] verbs = { 
+        "Soaring", "Roaring", "Gliding", "Hunting", "Striking", "Leaping", "Charging", "Diving", "Prowling", 
+        "Sprinting", "Creeping", "Surging", "Crashing", "Lunging", "Slashing", "Pouncing", "Swooping", "Darting", "Galloping", 
+        "Flanking", "Bolting", "Bounding", "Dashing", "Swarming", "Slithering", "Coiling", "Stampeding", "Prowling", "Snapping", 
+        "Hovering", "Swooshing", "Vaulting", "Weaving", "Ambushing", "Scouting", "Circling", "Thrashing", "Snarling", "Racing"
+    };
+    
+    // //function to get random name based on hashed gene sequence
+    // public string getName()
+    // {
+    //     int hashVal = Mathf.Abs(getHashVal()); // convert hash to positive int
+
+    //     string color = colors[hashVal % colors.Length];
+    //     string animal = animals[(hashVal / colors.Length) % animals.Length];
+    //     string verb = verbs[(hashVal / (colors.Length * animals.Length)) % verbs.Length];
+    //     //concat the color, animal, and verb
+    //     return $"{color}{animal}{verb}";
+    //     //return "timothyGene";
+    // }
+
     //function to get random name based on hashed gene sequence
     public string getName()
     {
-        return "timothyGene";
+        uint hashVal = getHashVal();
+        int colorHash = Math.Abs(Fnv1aHash(BitConverter.GetBytes(hashVal)));
+        int animalHash = Math.Abs(Fnv1aHash(BitConverter.GetBytes(hashVal + 1)));
+        int verbHash = Math.Abs(Fnv1aHash(BitConverter.GetBytes(hashVal + 2)));
+
+        string color = colors[colorHash % colors.Length];
+        string animal = animals[animalHash % animals.Length];
+        string verb = verbs[verbHash % verbs.Length];
+        //concat the color, ver, and animal
+        return $"{color}{verb}{animal}";
+    }
+
+    //hash function for converting gene sequence array via Fnv1aHash to uint
+    private uint getHashVal()
+    {
+        byte[] byteArray = FloatArrayToBytes(geneSequence);
+        return Fnv1aHash(byteArray);
+    }
+
+    //helper function to convert floats to bytes
+    private byte[] FloatArrayToBytes(float[] floatArray)
+    {
+        List<byte> bytes = new List<byte>();
+        foreach (float f in floatArray)
+        {
+            bytes.AddRange(BitConverter.GetBytes(f)); // Convert float to bytes and add to list
+        }
+        return bytes.ToArray();
+    }
+
+    //Fnv1aHash hash of byte array to signed int 
+    private uint Fnv1aHash(byte[] data)
+    {
+        uint hash = FNV1A_OFFSET_BASIS; //start with offset
+        foreach (byte b in data)
+        {
+            hash ^= b; // XOR with byte
+            hash *= FNV1A_FNV_32_PRIME; // then multiply by prime
+        }
+        return hash;
     }
 
     public int GetNumberOfFolds()

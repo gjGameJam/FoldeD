@@ -83,6 +83,8 @@ public class GameManager : MonoBehaviour
         if (activeGliders.Count == 0)
         {
             //UpdateUI();
+            //TODO: use gene manager getBestCompetitorName and getBestCompetitorDistance
+            //AddResultsToUI()
             SpawnGlidersForRound();
         }
     }
@@ -145,28 +147,65 @@ public class GameManager : MonoBehaviour
     }
 
     // Function to get the glider farthest from the starting position
+    // public GameObject GetFarthestGlider()
+    // {
+    //     //start with no glider and low furthest distance
+    //     GameObject farthestGlider = null;
+    //     float maxDistance = float.MinValue;
+
+    //     List<GameObject> glidersCopy = new List<GameObject>(activeGliders); //shallow copy of gliders because some might get removed
+    //     if (glidersCopy.Count == 0)
+    //     {
+    //         return null; //if there are no gliders return null early
+    //     }
+    //     foreach (var glider in glidersCopy)
+    //     {
+    //         if (glider != null) // Ensure the glider is valid
+    //         {
+    //             //get distance from start and update farthest glider and distance if distance is further than current max distance
+    //             float distance = getDistFromStart(glider.transform.position);
+    //             Debug.Log($"glider has fit score of {distance} for camera move");//debug to test vals in camera manager
+    //             if (distance > maxDistance)
+    //             {
+    //                 maxDistance = distance;
+    //                 farthestGlider = glider;
+    //             }
+    //         }
+    //     }
+
+    //     return farthestGlider;
+    // }
+
+    // Function to get the glider farthest from the starting position using active gliders and null checks
     public GameObject GetFarthestGlider()
     {
-        //start with no glider and low furthest distance
         GameObject farthestGlider = null;
         float maxDistance = float.MinValue;
 
-        List<GameObject> glidersCopy = new List<GameObject>(activeGliders); //shallow copy of gliders because some might get removed
-        if (glidersCopy.Count == 0)
+        if (activeGliders.Count == 0)
         {
-            return null; //if there are no gliders return null early
+            Debug.Log("No gliders available.");
+            return null;
         }
-        foreach (var glider in glidersCopy)
+
+        for (int i = 0; i < activeGliders.Count; i++)
         {
-            if (glider != null) // Ensure the glider is valid
+            GameObject glider = activeGliders[i];
+            if (glider != null)
             {
                 //get distance from start and update farthest glider and distance if distance is further than current max distance
                 float distance = getDistFromStart(glider.transform.position);
+                Debug.Log($"Glider {glider.name} has X distance: {distance} from start.");
                 if (distance > maxDistance)
                 {
                     maxDistance = distance;
                     farthestGlider = glider;
+                    Debug.Log($"New farthest glider: {glider.name} with X distance: {distance}");
                 }
+            }
+            else
+            {
+                Debug.Log($"Glider at index {i} is null, skipping.");
             }
         }
 
