@@ -102,7 +102,7 @@ public class GeneManger : MonoBehaviour
         if (BestCompetitor != null){
             return BestCompetitor.getName();
         }
-        return "N/A"
+        return "N/A";
     }
 
     //public function to get name of top competitor

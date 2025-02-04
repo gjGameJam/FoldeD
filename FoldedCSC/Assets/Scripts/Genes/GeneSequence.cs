@@ -1,6 +1,6 @@
 using UnityEngine;
-#include <cstdint>
-#include <cstring>
+using System.Collections.Generic;
+using System;
 
 /**
  * each glider will have a gene sequence that stores relevant information for the gene manager to use
@@ -100,11 +100,12 @@ public class GeneSequence
     //function to get random name based on hashed gene sequence
     public string getName()
     {
-        uint hashVal = getHashVal();
-        int colorHash = Math.Abs(Fnv1aHash(BitConverter.GetBytes(hashVal)));
-        int animalHash = Math.Abs(Fnv1aHash(BitConverter.GetBytes(hashVal + 1)));
-        int verbHash = Math.Abs(Fnv1aHash(BitConverter.GetBytes(hashVal + 2)));
-
+        uint hashVal = getHashVal(); //get positive hash val and 
+        //hash to get uints then mod to ensure no negatives and valid items are selected from arrays
+        uint colorHash = Fnv1aHash(BitConverter.GetBytes(hashVal));
+        uint animalHash = Fnv1aHash(BitConverter.GetBytes(hashVal + 1));
+        uint verbHash = Fnv1aHash(BitConverter.GetBytes(hashVal + 2));
+        //Debug.Log($"Colors: {colorHash}, Animals: {animalHash}, Verbs: {verbHash}");
         string color = colors[colorHash % colors.Length];
         string animal = animals[animalHash % animals.Length];
         string verb = verbs[verbHash % verbs.Length];
@@ -122,12 +123,9 @@ public class GeneSequence
     //helper function to convert floats to bytes
     private byte[] FloatArrayToBytes(float[] floatArray)
     {
-        List<byte> bytes = new List<byte>();
-        foreach (float f in floatArray)
-        {
-            bytes.AddRange(BitConverter.GetBytes(f)); // Convert float to bytes and add to list
-        }
-        return bytes.ToArray();
+        byte[] bytes = new byte[floatArray.Length * sizeof(float)];
+        Buffer.BlockCopy(floatArray, 0, bytes, 0, bytes.Length);
+        return bytes;
     }
 
     //Fnv1aHash hash of byte array to signed int 

@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private DistanceGraphing distanceGraphScript; //controls leaderboard
     [SerializeField] private GeneManger geneManager; //controls genetics
     [SerializeField] private int numGlidersPerRound = 7; //how many gliders should each round have?
+    private int generationNumber = 1;//start at one
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -82,15 +83,16 @@ public class GameManager : MonoBehaviour
 
         if (activeGliders.Count == 0)
         {
-            //UpdateUI();
             //TODO: use gene manager getBestCompetitorName and getBestCompetitorDistance
-            //AddResultsToUI()
+            //update UI results with best competitor from round (stored in gene manager)
+            AddResultsToUI(geneManager.getBestCompetitorName(), generationNumber++, geneManager.getBestCompetitorDistance());
+            //then spawn new gliders for next round
             SpawnGlidersForRound();
         }
     }
 
 
-    //TESTING SECTION to make sure dynamic adjustment of UI
+/*    //TESTING SECTION to make sure dynamic adjustment of UI
     private float timer = 0f;  // Timer to track time passed
     private float interval = 1.5f;  // Time interval in seconds
     //private float testDist = 5;
@@ -109,7 +111,7 @@ public class GameManager : MonoBehaviour
             // Reset the timer to reuse
             timer = 0f;
         }
-/*        if (activeGliders.Count == 0)
+*//*        if (activeGliders.Count == 0)
         {
             Debug.Log("gspawn new round");
             SpawnGlidersForRound();
@@ -119,9 +121,9 @@ public class GameManager : MonoBehaviour
             Debug.Log($"glider count current {activeGliders.Count}");
             // Clean up null references in case objects were destroyed
             activeGliders.RemoveAll(obj => obj == null);
-        }*/
+        }*//*
 
-    }//END OF TESTING SECTION to make sure dynamic adjustment of UI works
+    }//END OF TESTING SECTION to make sure dynamic adjustment of UI works*/
 
     //updates leaderboard controller and distance graphing each time data is available
     void AddResultsToUI(string gliderName, int generationNum, float distanceTravelled)

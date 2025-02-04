@@ -41,11 +41,18 @@ public class DistanceGraphing : MonoBehaviour
     //deletes all children from the distance graph
     void DeleteAllChildren()
     {
-        foreach (Transform child in graphContainer)
+        for (int i = graphContainer.childCount - 1; i >= 0; i--)
         {
-            Destroy(child.gameObject);  // Destroys the child gameObject
+            Transform child = graphContainer.GetChild(i);
+            //TODO: fix missing ref excep below (not impacting simulation but happens on end)
+            if (child != null)
+            {
+                Destroy(child.gameObject); //destroy data point
+                //child = null;
+            }
         }
     }
+
 
     
 

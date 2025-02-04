@@ -75,6 +75,7 @@ public class GliderFlight : MonoBehaviour
     }
 
     //before destroy each glider needs to save distance and gene sequence in gene manager
+    //TODO: fix double destroy here resulting in 0 fit score (double round happening due to destroy callback or something?)
     void OnDestroy() //consider using OnDisable() in order to perform update a bit before memory cleanup
     {
         float finalFitnessScore = getFitnessScore();
