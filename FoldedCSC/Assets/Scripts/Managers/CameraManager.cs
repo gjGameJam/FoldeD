@@ -4,63 +4,64 @@ using UnityEngine.UIElements;
 
 
 /**
- * manager to follow the leading glider each round (each glider has a camera attatched and updates every interval to follow new leader); goes back to the start once all gliders land
+ * manager to follow the leading glider each round via lerping to desired position (offset + target pos)
  * 
  * @author Grant Benson
  **/
 public class CameraManager : MonoBehaviour
 {
+    private GameObject currentLeadingGlider; //furthest glider in simulation to follow with camera
 
-    //reference to the game manager, which knows the gliders and starting point
-    [SerializeField] private GameManager GManager;
-    private Camera cam; //reference to camera
-    GameObject currentLeadingGlider; //glider that is being followed (uses camera attatched to glider)
+    [Header("Camera Settings")]
+    private Vector3 offset = new Vector3(10, -5, -20);  // The desired offset from the glider
+    private float smoothSpeed = 2f;  // lerp speed
+    private float rotationSpeed = 5f; // rotation speed
 
-
-    [Header("Camera timer variables")]
-    private float timer = 0f;  // Timer to track time passed between leading glider check
-    private readonly float interval = .2f;  // Time interval in seconds for how long to wait between checking leading glider
-
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    //follows lead glider based on largest x val
+    void LateUpdate()
     {
-        
+        // Find the new lead glider
+        GameObject newLeadGlider = FindLeadGlider();
+        if (newLeadGlider != null)
+        {
+            currentLeadingGlider = newLeadGlider;
+        }
+
+        if (currentLeadingGlider != null)
+        {
+            // apply the offset in world space using TransformPoint, which takes into account any rotation/transformations
+            Vector3 desiredPosition = currentLeadingGlider.transform.TransformPoint(offset);
+
+            // lerp from current position ot desiredPosition
+            transform.position = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed * Time.deltaTime);
+            //Debug.Log($"Camera Position: {transform.position}, Lead Glider Position: {currentLeadingGlider.transform.position}, Offset: {offset}");
+            //rotate the camera to look at the lead glider's position
+            //Vector3 direction = currentLeadingGlider.transform.position - transform.position;
+            //Quaternion targetRotation = Quaternion.LookRotation(direction);
+            //transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+
+        }
     }
 
-    // Update is called once per frame, follows leading glider and tries to get new leading paper glider every interval
-    void Update()
+    // find the lead glider based on the highest x val
+    GameObject FindLeadGlider()
     {
-        // Increment the timer by the time passed since the last frame
-        timer += Time.deltaTime;
-        // Check if interval amount of time has passed
-        if (timer >= interval)
+        GameObject[] gliders = GameObject.FindGameObjectsWithTag("Glider"); //searches through all gameobjects with glider tag (can have various types)
+        GameObject leadGlider = null;
+        float maxX = float.MinValue;
+        //loop through each, checking for null because they could have crashed
+        foreach (GameObject glider in gliders)
         {
-            // get which glider is in the lead (best fitness score)
-            GameObject newLeadGlider = GManager.GetFarthestGlider();
-            //if null round over go to start
-            if (newLeadGlider == null){
-                Debug.Log("no gliders for camera to follow");
-            }
-            if (currentLeadingGlider != newLeadGlider)
+            if (glider != null)
             {
-                // if the lead glider is different from current one being followed, change camera being used
-                //consider making camera switch function that disables camera in order to not render (improve performance)
-                //Debug.Log("following lead glider");
-                cam = newLeadGlider.GetComponent<Camera>();//get camera of newLeadGlider could be .GetComponentInChildren<Camera>();
+                float xDist = glider.transform.position.x;
+                if (xDist > maxX)
+                {
+                    maxX = xDist;
+                    leadGlider = glider;
+                }
             }
-
-            // Reset the timer to reuse
-            timer = 0f;
-        
         }
-        else
-        {
-            //keep tracking lead glider
-            
-        }
-
+        return leadGlider;
     }
-
-    
 }
