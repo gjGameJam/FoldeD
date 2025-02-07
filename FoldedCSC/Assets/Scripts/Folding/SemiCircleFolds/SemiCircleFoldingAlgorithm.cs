@@ -38,9 +38,10 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         private float topArea;  //the part that is visible from the top down view
         private float mass;  //weight of paper airplane (Kg)
         private bool canFly; //ability to fly or not
+        private Vector3 COM; //center of mass
 
         //physical attributes of a wing+middle part (half of a plane)
-        public PaperAirplanePhysicsAttributes(int numFolds, float radius, float thickness, float density, bool canFly)
+        public PaperAirplanePhysicsAttributes(int numFolds, float radius, float thickness, float density)
         {
             //initialize number of folds, radius, thickness, and calculate mass via volume and density from paper type
             this.numberOfFolds = numFolds;
@@ -55,6 +56,7 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
             topArea = calculateTopArea();
             frontArea = calculateFrontArea();
             mass = getMassOfQuarterCirclularPrism(radius, thickness, density);//calculate as quarter of small piece of circular prism
+            this.COM = calculateCenterOfMass(); //calculate Center of mass (COM) that can be retrieved via getter later
             this.canFly = true;//allow glider flight only after calculations are complete
         }
 
@@ -212,7 +214,7 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         }
 
         //function to get center of mass assuming a symmetrical glider
-        private Vector3 getCenterOfMass()
+        private Vector3 calculateCenterOfMass()
         {
             float distFromNoseToCentroid = GetDistanceFromTipToCentroid();//will be used as hypotenuse to calculate position
             float centroidTheta = getNoseAngleRadians() / 2; //the centroid bisects the actual circular sector (it's in the middle) so angle is halved
@@ -233,6 +235,11 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
                     //two circular sectors connected by a fold that are equal mass
                     return (leftwingCentroidPoint + rightwingCentroidPoint + (2 * middleCentroidPoint)) / 4; //calculate average pos of 4 semicircles 
             }
+        }
+
+        //returns the center of mass that was calculated in calculateCenterOfMass (called in constructor)
+        public Vector3 getCenterOfMass(){
+            return COM;
         }
 
         //helper function to get distance from the center of circlular sector (tip opposite of curved edge) to centroid
