@@ -211,6 +211,30 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
             }
         }
 
+        //function to get center of mass assuming a symmetrical glider
+        private Vector3 getCenterOfMass()
+        {
+            float distFromNoseToCentroid = GetDistanceFromTipToCentroid();//will be used as hypotenuse to calculate position
+            float centroidTheta = getNoseAngleRadians() / 2; //the centroid bisects the actual circular sector (it's in the middle) so angle is halved
+            //calculate centroid point based on model where back is origin and nose is (radius, 0, 0)
+            float forwardOffset = radius - distFromNoseToCentroid * Mathf.Cos(centroidTheta); //1 at 0 radians
+            float sideOffset = distFromNoseToCentroid * Mathf.Sin(centroidTheta); //0 at 0 radians
+            Vector3 nose = new Vector3(radius, 0, 0); //nose is always radius away from origin
+            Vector3 leftwingCentroidPoint = new Vector3(forwardOffset, 0, sideOffset);
+            Vector3 rightwingCentroidPoint = new Vector3(forwardOffset, 0, -sideOffset);
+            Vector3 middleCentroidPoint = new Vector3(forwardOffset, -sideOffset, 0); //piece is folded down
+            Vector3 noFoldsCentroidPoint = new Vector3(forwardOffset, sideOffset, 0);//piece not folded down
+            //each side will be considered as two circular sectors (the wing and middle) unless folds = 0
+            switch (numberOfFolds)
+            {
+                case 0:
+                    return noFoldsCentroidPoint; //only one large circular sector sticking up
+                default:
+                    //two circular sectors connected by a fold that are equal mass
+                    return (leftwingCentroidPoint + rightwingCentroidPoint + (2 * middleCentroidPoint)) / 4; //calculate average pos of 4 semicircles 
+            }
+        }
+
         //helper function to get distance from the center of circlular sector (tip opposite of curved edge) to centroid
         private float GetDistanceFromTipToCentroid(){
             //4r/3(theta) * sin(theta/2) is the equation for the distance from the center of circlular sector to the centroid
