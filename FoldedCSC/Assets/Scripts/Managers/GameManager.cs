@@ -43,7 +43,7 @@ public class GameManager : MonoBehaviour
             GameObject newGlider = Instantiate(gliderModel, startingPos, Quaternion.identity);
             Debug.Log($"Genes: #folds {genes[i].GetNumberOfFolds()} radius of {genes[i].GetPaperHeight()} with thickness of {genes[i].GetPaperWidth()}");
             //perform folding calculations from gene sequence to get correct physics and mesh generation numbers
-            PaperAirplanePhysicsAttributes foldResults = new PaperAirplanePhysicsAttributes(genes[i].GetNumberOfFolds(), genes[i].GetPaperHeight(), genes[i].GetPaperWidth(), genes[i].GetPaperDensity(), false); //(int numFolds, float radius, float thickness, float density, bool canFly
+            PaperAirplanePhysicsAttributes foldResults = new PaperAirplanePhysicsAttributes(genes[i].GetNumberOfFolds(), genes[i].GetPaperHeight(), genes[i].GetPaperWidth(), genes[i].GetPaperDensity()); //(int numFolds, float radius, float thickness, float density
 
             //use the triangle mesh generation script and input dimensions from folding algorithm to create triangle mesh model of paper
             if (genes[i].GetNumberOfFolds() == 0)

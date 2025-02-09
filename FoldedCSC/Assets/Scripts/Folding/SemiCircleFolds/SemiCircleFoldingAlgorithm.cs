@@ -17,8 +17,7 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
             numFolds: 1,
             radius: 7.0f,
             thickness: 0.2f,
-            density: 0.2f,
-            canFly: false
+            density: 0.2f
         );
         Debug.Log(airplaneAttributes.ToString());
     }
@@ -43,6 +42,8 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         //physical attributes of a wing+middle part (half of a plane)
         public PaperAirplanePhysicsAttributes(int numFolds, float radius, float thickness, float density)
         {
+            //don't allow any flight until all calculations are complete
+            this.canFly = false;
             //initialize number of folds, radius, thickness, and calculate mass via volume and density from paper type
             this.numberOfFolds = numFolds;
             this.radius = radius;
@@ -51,7 +52,7 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
             this.middleArea = -1;
             this.frontArea = -1;
             this.topArea = -1;
-            this.canFly = false;
+            this.COM = new Vector3();
             middleArea = calculateMiddleArea();
             topArea = calculateTopArea();
             frontArea = calculateFrontArea();
