@@ -61,6 +61,13 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
             this.canFly = true;//allow glider flight only after calculations are complete
         }
 
+        //get mean aerodynamic coord length
+        public float getMAC()
+        {
+            //TODO: fix this and create calculateMAC function that is called in constructor
+            return 0;
+        }
+
         //calculates the middle area of one side of plane (there will be two)
         //since the paper is oriented up (such that the middle SA is largest on 0 folds) no base case exists
         private float calculateMiddleArea()
