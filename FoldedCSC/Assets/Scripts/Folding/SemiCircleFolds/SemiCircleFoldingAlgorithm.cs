@@ -36,6 +36,7 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         private float frontArea; //the part that goes into the wind/air
         private float topArea;  //the part that is visible from the top down view
         private float mass;  //weight of paper airplane (Kg)
+        private float MAC; //mean aerodynamic chord used in physics calcs
         private bool canFly; //ability to fly or not
         private Vector3 COM; //center of mass
 
@@ -53,6 +54,8 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
             this.frontArea = -1;
             this.topArea = -1;
             this.COM = new Vector3();
+            this.MAC = -1;
+            this.MAC = calculateMAC();
             middleArea = calculateMiddleArea();
             topArea = calculateTopArea();
             frontArea = calculateFrontArea();
@@ -64,8 +67,16 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         //get mean aerodynamic coord length
         public float getMAC()
         {
-            //TODO: fix this and create calculateMAC function that is called in constructor
-            return 0;
+            return MAC;
+        }
+
+        //calculate MAC for circular sector wing
+        private float calculateMAC(){
+            //MAC = 2/3 * rootChord * (1 + lambda + lambda^2 / 1 + lambda)
+            //the root chord is the part of the wing connected to the fusledge, which there will not be in this case, so root chord = radius because wing is full length
+            //MAC = 2/3 * radius * (1 + lambda + lambda^2 / 1 + lambda)  lambda = chord at wing tip / chord at wing root (radius) = 0 / radius = 0
+            //so MAC = 2/3 * radius
+            return (radius * 2) / 3;
         }
 
         //calculates the middle area of one side of plane (there will be two)
