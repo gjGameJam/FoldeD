@@ -28,6 +28,7 @@ public class GliderFlight : MonoBehaviour
     private float fitnessScore;
     private float startingElevation;
     private float fallHeight = 5; //allow gliders to fall 5 meters before being destroyed
+    private float previousTotalDrag = 0;
     private Action<GliderFlight, string, float> onDestroyCallback;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -65,8 +66,8 @@ public class GliderFlight : MonoBehaviour
             //destroy the glider if it has fallen down the specified height
         }
         
-        //first calculate direction
-        Vector3 relativeAirflow = -rb.velocity.normalized; //determine relative air flow in order to apply drag on the COP in opposite direction
+/*        //first calculate direction
+        Vector3 relativeAirflow = -rb.linearVelocity.normalized; //determine relative air flow in order to apply drag on the COP in opposite direction
         //float AOA = getAngleOfAttack(relativeAirflow); //determine angle of attack (AOA) 0 while flat, positive for up, negative for down
         Vector3 liftDirection = Vector3.Cross(relativeAirflow, transform.right).normalized; //lift will be applied tn the COP perpendicular to relative air flow and right vector of glider
         Vector3 dragDirection = relativeAirflow; //drag always acts opposite of motion
@@ -84,7 +85,7 @@ public class GliderFlight : MonoBehaviour
 
         //third apply forces at COP and COM
         rb.AddForce(forceOnCenterOfMass, ForceMode.Force); //apply gravitational force to center of mass (COM)
-        rb.AddForceAtPosition(drag + lift, getCenterOfPressure(), ForceMode.Force); //apply drag and lift force to center of pressure (COP)
+        rb.AddForceAtPosition(drag + lift, getCenterOfPressure(), ForceMode.Force); //apply drag and lift force to center of pressure (COP)*/
         
     }
 
@@ -145,15 +146,15 @@ public class GliderFlight : MonoBehaviour
     private float getDragForce(float liftForce)
     {
         //get velocity mag to get dynamic pressure (q) =  p v^2 1/2  that will be used in drag equations
-        float velocityMag = rb.velocity.magnitude;
+        float velocityMag = rb.linearVelocity.magnitude;
         float dynamicPressure = Mathf.Pow(velocityMag, 2) * DENSITY_OF_AIR / 2;
         //skin friction is dynamic pressure * wetted surface area * skin friction coefficient
-        float skinFriction = dynamicPressure * physNums.getTotalSurfaceArea() * getCoefficientOfSkinFrictionDrag(velocityMag); //friction generated when air molecules stick to flying object (10-30% of drag)
+        float skinFriction = dynamicPressure * physNums.GetTotalArea() * getCoefficientOfSkinFrictionDrag(velocityMag); //friction generated when air molecules stick to flying object (10-30% of drag)
         //induced drag is force of lift^2 / (dynamic pressure * wings surface area * PI * oswald efficiency factor * aspect ratio)
-        float aspectRat = getAspectRatio(physNums.getWingspan(), physNums.getWingsSurfaceArea()); //consider setting this at start or moving to physnums to calc + get
-        float inducedDrag = Mathf.Pow(liftForce, 2) / (dynamicPressure * physNums.getWingsSurfaceArea() * Mathf.PI * getOswaldApproximation(aspectRat) * aspectRat);
+        float aspectRat = getAspectRatio(physNums.getWingspan(), physNums.getTopArea()); //consider setting this at start or moving to physnums to calc + get
+        float inducedDrag = Mathf.Pow(liftForce, 2) / (dynamicPressure * physNums.getTopArea() * Mathf.PI * getOswaldApproximation(aspectRat) * aspectRat);
         //form drag is dynamic pressure * Sfront * form drag coefficient
-        float formDrag = dynamicPressure * physNums.getFrontalSurfaceArea() * getCoefficientOfFormDrag(velocityMag);
+        float formDrag = dynamicPressure * physNums.getFrontArea() * getCoefficientOfFormDrag(velocityMag);
 
         //sum all drag contributors and return total drag
         return skinFriction + inducedDrag + formDrag;
@@ -177,7 +178,7 @@ public class GliderFlight : MonoBehaviour
         }
 
         // Cd = (2 * FdragTotal) / (DENSITY_OF_AIR * V^2 * Sfront)
-        return (2f * previousTotalDrag) / (DENSITY_OF_AIR * Mathf.Pow(velocityMag, 2) * physNums.getFrontalSurfaceArea());
+        return (2f * previousTotalDrag) / (DENSITY_OF_AIR * Mathf.Pow(velocityMag, 2) * physNums.getFrontArea());
     }
 
     //gets coefficient of skin friction drag

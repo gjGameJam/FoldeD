@@ -48,11 +48,11 @@ public class GameManager : MonoBehaviour
             //use the triangle mesh generation script and input dimensions from folding algorithm to create triangle mesh model of paper
             if (genes[i].GetNumberOfFolds() == 0)
             {
-                newGlider.GetComponent<TriangleGenerator>().CreateDartPlaneModel(foldResults.calculateWingspan(), foldResults.getRadius(), foldResults.getThicknessFolded(), true); //create unfolded model
+                newGlider.GetComponent<TriangleGenerator>().CreateDartPlaneModel(foldResults.getWingspan(), foldResults.getRadius(), foldResults.getThicknessFolded(), true); //create unfolded model
             }
             else
             {
-                newGlider.GetComponent<TriangleGenerator>().CreateDartPlaneModel(foldResults.calculateWingspan(), foldResults.getRadius(), foldResults.getThicknessFolded(), false); //create folded model
+                newGlider.GetComponent<TriangleGenerator>().CreateDartPlaneModel(foldResults.getWingspan(), foldResults.getRadius(), foldResults.getThicknessFolded(), false); //create folded model
             }
 
             //need to assign gene sequence gene[i] and foldResults to each glider

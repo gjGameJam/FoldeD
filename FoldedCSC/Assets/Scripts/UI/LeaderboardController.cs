@@ -71,7 +71,7 @@ public class LeaderboardController :  MonoBehaviour
         foreach (LeaderboardEntry entryData in leaderBoardEntries)
         {
             //use custom toString method to use as text, incrementing index to edit each loop
-            leaderboardText[index++].text = $"{entryData.Name} (Gen#{entryData.GenerationNumber}) flew {entryData.DistanceTravelled:F3} Meters";
+            leaderboardText[index++].text = $"{entryData.Name} (Gen#{entryData.GenerationNumber}) flew {entryData.DistanceTravelled:F2} Meters"; //limit to 2 decimal places
         }
     }
 

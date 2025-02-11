@@ -37,6 +37,8 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
         private float topArea;  //the part that is visible from the top down view
         private float mass;  //weight of paper airplane (Kg)
         private float MAC; //mean aerodynamic chord used in physics calcs
+        private float wingspan; //wingspan of one side in meters
+        private float totalArea; //wetted surface area in flight
         private bool canFly; //ability to fly or not
         private Vector3 COM; //center of mass
 
@@ -55,11 +57,15 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
             this.topArea = -1;
             this.COM = new Vector3();
             this.MAC = -1;
+            this.wingspan = -1;
+            this.totalArea = -1;
+            this.wingspan = calculateWingspan(); //calculate wingspan before surface areas (it is needed for SA calcs)
             this.MAC = calculateMAC();
-            middleArea = calculateMiddleArea();
-            topArea = calculateTopArea();
-            frontArea = calculateFrontArea();
-            mass = getMassOfQuarterCirclularPrism(radius, thickness, density);//calculate as quarter of small piece of circular prism
+            this.middleArea = calculateMiddleArea();
+            this.topArea = calculateTopArea();
+            this.frontArea = calculateFrontArea();
+            this.totalArea = middleArea + frontArea + topArea; //add all sides to get total for one side
+            this.mass = getMassOfQuarterCirclularPrism(radius, thickness, density);//calculate as quarter of small piece of circular prism
             this.COM = calculateCenterOfMass(); //calculate Center of mass (COM) that can be retrieved via getter later
             this.canFly = true;//allow glider flight only after calculations are complete
         }
@@ -112,7 +118,7 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
                     //Debug.Log("zero folds!");
                     return thickness * radius; 
                 default: //if there are folds, the frontal area is wingspan * thickness * 2 (because front section has two wings worth of air exposure)
-                    return getThicknessFolded() * calculateWingspan() * 2; //thickness * wingspan is the area exposed to forward air by one side (there are two)
+                    return getThicknessFolded() * getWingspan() * 2; //thickness * wingspan is the area exposed to forward air by one side (there are two)
             }
         }
 
@@ -131,8 +137,8 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
             return oppositeSide; // Return the calculated opposite side length
         }
 
-        //gets the wingspan of one wing given the number of folds and radius
-        public float calculateWingspan()
+        //calculates the wingspan of one wing given the number of folds and radius
+        private float calculateWingspan()
         {
             //if no folds have occured the wing span will be the thickness of the paper
             switch (numberOfFolds)
@@ -144,6 +150,18 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour
                     float wingspan = GetOppositeSideLength(getNoseAngleRadians(), radius);
                     return wingspan; //wingspan is the distance from the middle to the wing edge
             }
+        }
+
+        //getter for wingspan
+        public float getWingspan()
+        {
+            return wingspan;
+        }
+        
+        //returns total wetted (exposed to air) surface area by adding up all sides
+        public float GetTotalArea()
+        {
+            return totalArea;
         }
 
         //helper function for decay relationship of halving of paper due to folds
