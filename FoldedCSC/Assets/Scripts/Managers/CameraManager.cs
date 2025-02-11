@@ -15,7 +15,7 @@ public class CameraManager : MonoBehaviour
     [Header("Camera Settings")]
     private Vector3 offset = new Vector3(10, -5, -20);  // The desired offset from the glider
     private float smoothSpeed = 2f;  // lerp speed
-    private float rotationSpeed = 5f; // rotation speed
+    //TODO: add rotation to capture all gliders in flight? private float rotationSpeed = 5f; // rotation speed
 
     //follows lead glider based on largest x val
     void LateUpdate()

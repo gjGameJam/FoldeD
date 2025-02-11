@@ -21,7 +21,7 @@ public class DistanceGraphing : MonoBehaviour
     private float dataPointSize = 25.0f;
     float graphHeight, graphWidth; //keep track of graph's size in order to rescale data points appropriately
     float maxFlightDistance = 100; //max distance at 100 meters for graph
-    float dataPointOffsetPerRound = 50.0f;
+    //float dataPointOffsetPerRound = 50.0f; /dynamically resizing based on size of background
     float initialDataPointXOffset = 10.0f;
     float initialDataPointYOffset = 7.5f;
     List<float> testList = new List<float>(); //list to store data points (distance vals)

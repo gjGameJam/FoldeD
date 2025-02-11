@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+/*using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using static GeneticSplicer;
@@ -142,11 +142,12 @@ public class oldGameManager : MonoBehaviour
         activePlanes.Remove(plane);
     }
 
-/*    public void updateSimulationTimeDelta()
+*//*    public void updateSimulationTimeDelta()
     {
         //updates the time scale when the slider is moved
         simulation_time_multiplier = timeScaleSlider.value;
         //need to multiply all paper airplane flight's delta time by this number (starts at 1)
         Debug.Log("new time scale: " + simulation_time_multiplier);
-    }*/
+    }*//*
 }
+*/
