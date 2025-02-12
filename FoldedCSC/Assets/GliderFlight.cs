@@ -1,6 +1,7 @@
 using System;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.InputSystem.Utilities;
 using static SemiCircleFoldingAlgorithm;
 
 /**
@@ -29,6 +30,7 @@ public class GliderFlight : MonoBehaviour
     private float startingElevation;
     private float fallHeight = 5; //allow gliders to fall 5 meters before being destroyed
     private float previousTotalDrag = 0;
+    private float previousTotalLift = 0;
     private Action<GliderFlight, string, float> onDestroyCallback;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -65,28 +67,32 @@ public class GliderFlight : MonoBehaviour
         if (checkForEndOfFlight()){
             //destroy the glider if it has fallen down the specified height
         }
-        
-/*        //first calculate direction
+
+        //first calculate direction
         Vector3 relativeAirflow = -rb.linearVelocity.normalized; //determine relative air flow in order to apply drag on the COP in opposite direction
-        //float AOA = getAngleOfAttack(relativeAirflow); //determine angle of attack (AOA) 0 while flat, positive for up, negative for down
+                                                                 //float AOA = getAngleOfAttack(relativeAirflow); //determine angle of attack (AOA) 0 while flat, positive for up, negative for down
         Vector3 liftDirection = Vector3.Cross(relativeAirflow, transform.right).normalized; //lift will be applied tn the COP perpendicular to relative air flow and right vector of glider
         Vector3 dragDirection = relativeAirflow; //drag always acts opposite of motion
+                                                 //get velocity mag to get dynamic pressure (q) =  p v^2 1/2  that will be used in drag equations
+        float velocityMag = rb.linearVelocity.magnitude;
+        float dynamicPressure = Mathf.Pow(velocityMag, 2) * DENSITY_OF_AIR / 2;
 
         //second calculate forces (lift will be 0 and drag will be higher if AOA is at or above stall angle)
         //COM calcs
         //gravity will always pull directly down on the COM, the only force balancing out the forces on the COP
         Vector3 forceOnCenterOfMass = new Vector3(0, -ForceOfGravity(), 0); //apply force of gravity downward on COM
-        //COP calcs
-        float liftForce = getLiftForce();
+                                                                            //COP calcs
+        float liftForce = getLiftForce(velocityMag, dynamicPressure);
         //TODO: combine into one vector3 once accuracy in ensured to improve performance
-        Vector3 drag = getDragForce(liftForce) * dragDirection;//DragVector = dragForce * dragDirection
+        Vector3 drag = getDragForce(liftForce, velocityMag, dynamicPressure) * dragDirection;//DragVector = dragForce * dragDirection
         Vector3 lift = liftForce * liftDirection; //LiftVector = liftForce * liftDirection
-        //Vector3 forceOnCenterOfPressure = drag + lift; //add drag and lift to get all forces acting on center of pressure
+                                                  //Vector3 forceOnCenterOfPressure = drag + lift; //add drag and lift to get all forces acting on center of pressure
 
         //third apply forces at COP and COM
-        rb.AddForce(forceOnCenterOfMass, ForceMode.Force); //apply gravitational force to center of mass (COM)
-        rb.AddForceAtPosition(drag + lift, getCenterOfPressure(), ForceMode.Force); //apply drag and lift force to center of pressure (COP)*/
-        
+        //TODO: assure accuracy of COP, COM, lift force, and drag force
+        //rb.AddForce(forceOnCenterOfMass, ForceMode.Force); //apply gravitational force to center of mass (COM)
+        //rb.AddForceAtPosition(drag + lift, getCenterOfPressure(), ForceMode.Force); //apply drag and lift force to center of pressure (COP)
+
     }
 
     //function passed in by game manager to update ui/camera on death
@@ -112,7 +118,7 @@ public class GliderFlight : MonoBehaviour
     {
         //TODO: get this showing yellow dot for center of mass testing
         Gizmos.color = Color.yellow;
-        Gizmos.DrawSphere(getPositionOfCOM(), 1);//draw sphere to visualize center of mass on each glider
+        Gizmos.DrawSphere(getPositionOfCOM(), .25f);//draw sphere to visualize center of mass on each glider
     }
 
     //calculate the center of pressure for glider's lift and drag act upon
@@ -143,32 +149,43 @@ public class GliderFlight : MonoBehaviour
 
     //adds the skin friction,form, and induced drag forces then returns
     //not accounting for interference drag (from folds and wings meeting middle part)
-    private float getDragForce(float liftForce)
+    private float getDragForce(float liftForce, float vMag, float q)
     {
-        //get velocity mag to get dynamic pressure (q) =  p v^2 1/2  that will be used in drag equations
-        float velocityMag = rb.linearVelocity.magnitude;
-        float dynamicPressure = Mathf.Pow(velocityMag, 2) * DENSITY_OF_AIR / 2;
         //skin friction is dynamic pressure * wetted surface area * skin friction coefficient
-        float skinFriction = dynamicPressure * physNums.GetTotalArea() * getCoefficientOfSkinFrictionDrag(velocityMag); //friction generated when air molecules stick to flying object (10-30% of drag)
+        float skinFriction = q * physNums.GetTotalArea() * getCoefficientOfSkinFrictionDrag(vMag); //friction generated when air molecules stick to flying object (10-30% of drag)
         //induced drag is force of lift^2 / (dynamic pressure * wings surface area * PI * oswald efficiency factor * aspect ratio)
         float aspectRat = getAspectRatio(physNums.getWingspan(), physNums.getTopArea()); //consider setting this at start or moving to physnums to calc + get
-        float inducedDrag = Mathf.Pow(liftForce, 2) / (dynamicPressure * physNums.getTopArea() * Mathf.PI * getOswaldApproximation(aspectRat) * aspectRat);
+        float inducedDrag = Mathf.Pow(liftForce, 2) / (q * physNums.getTopArea() * Mathf.PI * getOswaldApproximation(aspectRat) * aspectRat);
         //form drag is dynamic pressure * Sfront * form drag coefficient
-        float formDrag = dynamicPressure * physNums.getFrontArea() * getCoefficientOfFormDrag(velocityMag);
+        float formDrag = q * physNums.getFrontArea() * getCoefficientOfFormDrag(vMag);
 
         //sum all drag contributors and return total drag
         return skinFriction + inducedDrag + formDrag;
     }
 
-    //get lift force function
-    private float getLiftForce(){
-        return 0f; //consider returning 0 if AOA is too high (stall out effect)
+    //get lift force function: Flift = p v^2 / 2 SAwing CLift = q * SAwing * CLift
+    private float getLiftForce(float vMag, float q)
+    {
+        //return 0f; //consider returning 0 if AOA is too high (stall out effect)
+        float wingArea = physNums.getTopArea();
+        float liftForce = q * wingArea * getCoefficientOfLift(vMag, q); //q * SAwing * CLift
+        previousTotalLift = liftForce;
+        return liftForce;
     }
 
     //force of gravity is just Mass * AccelerationOfGrav
     private float ForceOfGravity()
     {
         return (rb.mass * ACCELERATION_OF_GRAVITY);//consider using other equation (that uses both masses and distance) to incorporate other planets
+    }
+
+    //helper function Lift Coefficient = 2 * Flift / p v^2 SAwing (using lift from previous update loop for coefficient)
+    private float getCoefficientOfLift(float vMag, float q)
+    {
+        //since Coefficient = 2 * Flift / p v^2 SAwing
+        //q = p v^2 / 2
+        //2 * Flift / p v^2 SAwing = 2 * Flift / 2 * q = Flift / q
+        return previousTotalLift / q;
     }
 
     //gets coefficient of form drag
