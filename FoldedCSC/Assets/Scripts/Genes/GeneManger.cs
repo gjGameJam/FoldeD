@@ -12,18 +12,19 @@ using UnityEngine.SceneManagement;
  **/
 public class GeneManger : MonoBehaviour
 {
-    GeneSequence BestCompetitor, SecondBestCompetitor = null; //keep track of first and second best gene sequences (init as null)
-    string bestCompName;
-    float BestCompetitorDist, SecondBestCompetitorDist = 0;
-    private int maxNumberOfFolds = 6;
-    private float mutationChance = .5f;
-    private float minThrowSpeed = 5; // (m/s)
-    private float maxThrowSpeed = 15; // (m/s)
-    private float minDensity = 600; // (kg/m^3)
-    private float maxDensity = 1100; // (kg/m^3)
-    private float minPaperDimension = .0001f; // (m) paper can easily reach .1 mm thickness in any given direction
-    private float maxPaperDimension = 5; // (m) paper can easily reach 5 m thickness in any given direction
-    private float maxPaperThickness = .5f; // (m) paper can be up to .5 meters thick
+    private GeneSequence BestCompetitor, SecondBestCompetitor = null; //keep track of first and second best gene sequences (init as null)
+    private string bestCompName;
+    private float BestCompetitorDist, SecondBestCompetitorDist = 0;
+    private static readonly int maxNumberOfFolds = 6;
+    private static readonly float mutationChance = .5f;
+    private static readonly float minThrowSpeed = 5; // (m/s)
+    private static readonly float maxThrowSpeed = 15; // (m/s)
+    private static readonly float minDensity = 600; // (kg/m^3)
+    private static readonly float maxDensity = 1100; // (kg/m^3)
+    private static readonly float minPaperDimension = .0001f; // (m) paper can easily reach .1 mm thickness in any given direction
+    private static readonly float maxPaperDimension = 5; // (m) paper can easily reach 5 m thickness in any given direction
+    private static readonly float maxPaperThickness = .5f; // (m) paper can be up to .5 meters thick
+    private static readonly float maxThrowAngle = 90; // (degrees) maximum initial angle a plane can be thrown
 
 
     //main function that has all functionality wrapped into it
@@ -72,8 +73,9 @@ public class GeneManger : MonoBehaviour
         float length = UnityEngine.Random.Range(minPaperDimension, maxPaperDimension);
         float width = UnityEngine.Random.Range(minPaperDimension, maxPaperThickness);
         float height = UnityEngine.Random.Range(minPaperDimension, maxPaperDimension);
+        float throwAngle = UnityEngine.Random.Range(-maxThrowAngle, maxThrowAngle);
         //GeneSequence(int numberOfFolds, float initialVelocity, float paperDensity, float paperLength, float paperHeight, float paperWidth)
-        return new GeneSequence(numberOfFolds, throwSpeed, density, length, height, width);
+        return new GeneSequence(numberOfFolds, throwSpeed, density, length, height, width, throwAngle);
     }
 
     //function for game manager to call to update best competitors upon glider crash
@@ -202,6 +204,10 @@ public class GeneManger : MonoBehaviour
                 else if (i <= 5 && i >= 3)
                 {
                     toBeAdded = Clamp(toBeAdded, minPaperDimension, maxPaperDimension); //clamping paper dimensions to achievable bounds
+                }
+                else if (i == 6) //clamp initial throw angle to -90 to 90
+                {
+                    toBeAdded = Clamp(toBeAdded, -maxThrowAngle, maxThrowAngle);
                 }
             }
             //add to mutated array regardless if mutation took place

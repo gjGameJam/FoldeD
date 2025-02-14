@@ -16,13 +16,14 @@ public class GeneSequence
     private float paperLength; //measurement for how long piece of paper is (x length in meters)
     private float paperHeight; //measurement for how tall piece of paper is (y length in meters)
     private float paperWidth; //measurement for how thick piece of paper is (z length in meters)
+    private float initialAngle; //angle in which the glider will be thrown (in degrees)
     public float[] geneSequence;//array to store/splice all gene values
 
     private const uint FNV1A_OFFSET_BASIS = 2166136261;  // FNV-1a 32-bit offset basis
     private const uint FNV1A_FNV_32_PRIME = 16777619;  // FNV-1a prime
 
     // Constructor
-    public GeneSequence(int numberOfFolds, float initialVelocity, float paperDensity, float paperLength, float paperHeight, float paperWidth)
+    public GeneSequence(int numberOfFolds, float initialVelocity, float paperDensity, float paperLength, float paperHeight, float paperWidth, float initialAngle)
     {
         this.numberOfFolds = numberOfFolds;
         this.initialVelocity = initialVelocity;
@@ -30,19 +31,22 @@ public class GeneSequence
         this.paperLength = paperLength;
         this.paperHeight = paperHeight;
         this.paperWidth = paperWidth;
-        this.geneSequence = new float[6] { numberOfFolds, initialVelocity, paperDensity, paperLength, paperHeight, paperWidth };//stores # folds, Vinit, density, length, height, and width
+        this.initialAngle = initialAngle;
+        this.geneSequence = new float[7] { numberOfFolds, initialVelocity, paperDensity, paperLength, paperHeight, paperWidth, initialAngle};//stores # folds, Vinit, density, length, height, and width
     }
 
     // Constructor with only geneSequence, copies data to fields (used in gene manager for splicing)
     public GeneSequence(float[] geneSequence)
     {
         this.geneSequence = geneSequence;
+        //numberOfFolds, initialVelocity, paperDensity, paperLength, paperHeight, paperWidth, initialAngle
         this.numberOfFolds = (int)geneSequence[0];
         this.initialVelocity = geneSequence[1];
         this.paperDensity = geneSequence[2];
         this.paperLength = geneSequence[3];
         this.paperHeight = geneSequence[4];
         this.paperWidth = geneSequence[5];
+        this.initialAngle = geneSequence[6];
     }
 
     // Clone method to create deep copy of object (not shared)
@@ -55,7 +59,8 @@ public class GeneSequence
             this.paperDensity,
             this.paperLength,
             this.paperHeight,
-            this.paperWidth
+            this.paperWidth,
+            this.initialAngle
         );
 
         // deep copy the geneSequence array to ensure it's not shared
@@ -138,6 +143,10 @@ public class GeneSequence
             hash *= FNV1A_FNV_32_PRIME; // then multiply by prime
         }
         return hash;
+    }
+
+    public float GetInitialAngle(){
+        return initialAngle;
     }
 
     public int GetNumberOfFolds()

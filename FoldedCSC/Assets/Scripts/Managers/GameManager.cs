@@ -18,7 +18,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private DistanceGraphing distanceGraphScript; //controls leaderboard
     [SerializeField] private GeneManger geneManager; //controls genetics
     [SerializeField] private int numGlidersPerRound = 7; //how many gliders should each round have?
-    private int generationNumber = 1;//start at one
+    private int generationNumber = 0; //keeps track of how many rounds (generations) have occured
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -71,6 +71,7 @@ public class GameManager : MonoBehaviour
 
         }
         //end of loop spawning all gliders
+        generationNumber++; //increment generation number after new generation spawn
     }
 
     //function gliders call when they crash
@@ -85,7 +86,7 @@ public class GameManager : MonoBehaviour
         {
             //TODO: use gene manager getBestCompetitorName and getBestCompetitorDistance
             //update UI results with best competitor from round (stored in gene manager)
-            AddResultsToUI(geneManager.getBestCompetitorName(), generationNumber++, geneManager.getBestCompetitorDistance());
+            AddResultsToUI(geneManager.getBestCompetitorName(), generationNumber, geneManager.getBestCompetitorDistance());
             //then spawn new gliders for next round
             SpawnGlidersForRound();
         }
