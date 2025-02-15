@@ -31,13 +31,13 @@ public class GliderFlight : MonoBehaviour
     private float fallHeight = 5; //allow gliders to fall 5 meters before being destroyed
     private float previousTotalDrag = 0;
     private float previousTotalLift = 0;
-    private Action<GliderFlight, string, float> onDestroyCallback;
+    private Action<GliderFlight, string, float> onCrashCallback;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        float maxLifeSpan = 8f; // Set lifespan before destruction
-        Destroy(gameObject, UnityEngine.Random.Range(2, maxLifeSpan)); // Destroys this GameObject after max lifeSpan seconds
+        //float maxLifeSpan = 8f; // Set lifespan before destruction
+        //Destroy(gameObject, UnityEngine.Random.Range(2, maxLifeSpan)); // Destroys this GameObject after max lifeSpan seconds
         // Get the current GameObject and set fitness score to x value on start and set starting elevation to y value
         startingFitness = transform.position.x;
         startingElevation = transform.position.y;
@@ -66,6 +66,10 @@ public class GliderFlight : MonoBehaviour
 
         if (checkForEndOfFlight()){
             //destroy the glider if it has fallen down the specified height
+            float finalFitnessScore = getFitnessScore();
+            //update gene manager with the gene sequence and fitness score (distance travelled in x direction)
+            geneManager.UpdateBestCompetitor(geneSeq, finalFitnessScore);
+            onCrashCallback(this, geneSeq.getName(), finalFitnessScore); // Pass the glider flight instance to the callback to be destroyed
         }
 
         //first calculate direction
@@ -98,19 +102,16 @@ public class GliderFlight : MonoBehaviour
     //function passed in by game manager to update ui/camera on death
     public void SetOnDestroyCallback(Action<GliderFlight, string, float> callback)
     {
-        onDestroyCallback = callback; //calls HandleGliderDestroyed function in game manager
+        onCrashCallback = callback; //calls HandleGliderDestroyed function in game manager
     }
 
-    //before destroy each glider needs to save distance and gene sequence in gene manager
+/*    //before destroy each glider needs to save distance and gene sequence in gene manager
     //TODO: fix double destroy here resulting in 0 fit score (end of round causing respawning due to destroy callback or something)
     void OnDestroy() //consider using OnDisable() in order to perform update a bit before memory cleanup
     {
-        float finalFitnessScore = getFitnessScore();
-        //update gene manager with the gene sequence and fitness score (distance travelled in x direction)
-        geneManager.UpdateBestCompetitor(geneSeq, finalFitnessScore);
-        onDestroyCallback(this, geneSeq.getName(), finalFitnessScore); // Pass the glider flight instance to the callback to be destroyed
 
-    }
+
+    }*/
 
     //TESTING function to determine if COM of gliders are being correctly computed and maintained
     //Ensure "Gizmos" is enabled in the Scene View (top right corner).
@@ -144,7 +145,11 @@ public class GliderFlight : MonoBehaviour
     //adds glider position with set center of mass to get current COM position (might have to reposition glider prefab)
     private Vector3 getPositionOfCOM()
     {
+        //if (rb != null) return transform.position + rb.centerOfMass;//use null check if null ref occurs
+        //else return transform.position;
         return transform.position + rb.centerOfMass;
+        
+        
     }
 
     //adds the skin friction,form, and induced drag forces then returns
