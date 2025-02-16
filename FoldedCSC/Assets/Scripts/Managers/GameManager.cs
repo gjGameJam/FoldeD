@@ -41,7 +41,7 @@ public class GameManager : MonoBehaviour
 
             //create glider object at starting point
             GameObject newGlider = Instantiate(gliderModel, startingPos, Quaternion.identity);
-            Debug.Log($"Genes: #folds {genes[i].GetNumberOfFolds()} radius of {genes[i].GetPaperHeight()} with thickness of {genes[i].GetPaperWidth()}");
+            Debug.Log($"Genes: #folds {genes[i].GetNumberOfFolds()} radius of {genes[i].GetPaperHeight()} with thickness of {genes[i].GetPaperWidth()} and throw speed of {genes[i].GetInitialVelocity()}");
             //perform folding calculations from gene sequence to get correct physics and mesh generation numbers
             PaperAirplanePhysicsAttributes foldResults = new PaperAirplanePhysicsAttributes(genes[i].GetNumberOfFolds(), genes[i].GetPaperHeight(), genes[i].GetPaperWidth(), genes[i].GetPaperDensity()); //(int numFolds, float radius, float thickness, float density
 
