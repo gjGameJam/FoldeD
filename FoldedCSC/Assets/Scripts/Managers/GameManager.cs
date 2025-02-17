@@ -16,7 +16,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject gliderModel; //glider prefab to spawn (consider strengthening connection)
     [SerializeField] private LeaderboardController leaderBoardScript; //controls leaderboard
     [SerializeField] private DistanceGraphing distanceGraphScript; //controls leaderboard
-    [SerializeField] private GeneManger geneManager; //controls genetics
+    [SerializeField] private GeneManager geneManager; //controls genetics
     [SerializeField] private int numGlidersPerRound = 7; //how many gliders should each round have?
     private int generationNumber = 0; //keeps track of how many rounds (generations) have occured
 
@@ -24,8 +24,6 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         //creates test glider and adds it to active gliders
-        //activeGliders.Add(Instantiate(gliderModel, startingPos, Quaternion.identity));
-        //Debug.Log("tryingToSpawnGliders");
         SpawnGlidersForRound();
         //Debug.Log("spawnedGliders!!!:)");
     }
@@ -64,10 +62,7 @@ public class GameManager : MonoBehaviour
 
             //finally add glider as an active glider now that physics, genes, and rendering are handled
             activeGliders.Add(newGlider);
-
-            //enable movement in glider (disabled by default) now that everything is set and glider is active
-            //already happens in constructor after calcs are finished
-            //foldResults.AllowFlight(); //now allow the glider to fly once folding calculations and mesh generation are complete
+            //a this point canFly bool is already set to true after folding calculations
 
         }
         //end of loop spawning all gliders
@@ -85,7 +80,6 @@ public class GameManager : MonoBehaviour
 
         if (activeGliders.Count == 0)
         {
-            //TODO: use gene manager getBestCompetitorName and getBestCompetitorDistance
             //update UI results with best competitor from round (stored in gene manager)
             AddResultsToUI(geneManager.getBestCompetitorName(), generationNumber, geneManager.getBestCompetitorDistance());
             //then spawn new gliders for next round
@@ -134,8 +128,6 @@ public class GameManager : MonoBehaviour
         leaderBoardScript.AddToLeaderboard(gliderName, generationNum, distanceTravelled);
         //update distance graph with new distance
         distanceGraphScript.AddToGraph(distanceTravelled);
-        //look to prevent coupling with camera manager (maybe update from here when leader dies?)
-
     }
 
     //getter for the gliders still flying
@@ -150,35 +142,6 @@ public class GameManager : MonoBehaviour
         return pos.x - startingPos.x;
     }
 
-    // Function to get the glider farthest from the starting position
-    // public GameObject GetFarthestGlider()
-    // {
-    //     //start with no glider and low furthest distance
-    //     GameObject farthestGlider = null;
-    //     float maxDistance = float.MinValue;
-
-    //     List<GameObject> glidersCopy = new List<GameObject>(activeGliders); //shallow copy of gliders because some might get removed
-    //     if (glidersCopy.Count == 0)
-    //     {
-    //         return null; //if there are no gliders return null early
-    //     }
-    //     foreach (var glider in glidersCopy)
-    //     {
-    //         if (glider != null) // Ensure the glider is valid
-    //         {
-    //             //get distance from start and update farthest glider and distance if distance is further than current max distance
-    //             float distance = getDistFromStart(glider.transform.position);
-    //             Debug.Log($"glider has fit score of {distance} for camera move");//debug to test vals in camera manager
-    //             if (distance > maxDistance)
-    //             {
-    //                 maxDistance = distance;
-    //                 farthestGlider = glider;
-    //             }
-    //         }
-    //     }
-
-    //     return farthestGlider;
-    // }
 
     // Function to get the glider farthest from the starting position using active gliders and null checks
     public GameObject GetFarthestGlider()

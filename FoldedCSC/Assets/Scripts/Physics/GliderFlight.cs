@@ -31,6 +31,7 @@ public class GliderFlight : MonoBehaviour
     private float fallHeight = 5; //allow gliders to fall 5 meters before being destroyed
     private float previousTotalDrag = 0;
     private float previousTotalLift = 0;
+    private float previousCOPXOffset = 0; //TODO: set this as appropriate starting value in start (like MAC / 4 or radius / 4)
     private Action<GliderFlight, string, float> onCrashCallback;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -95,37 +96,62 @@ public class GliderFlight : MonoBehaviour
         //third apply forces at COP and COM
         //TODO: assure accuracy of COP, COM, lift force, and drag force
         //rb.AddForce(forceOnCenterOfMass, ForceMode.Force); //apply gravitational force to center of mass (COM)
-        //rb.AddForceAtPosition(drag + lift, getCenterOfPressure(), ForceMode.Force); //apply drag and lift force to center of pressure (COP)
+        //rb.AddForceAtPosition(drag + lift, getCenterOfPressureEstimate(velocityMag, dynamicPressures), ForceMode.Force); //apply drag and lift force to center of pressure (COP)
 
     }
 
-    //function passed in by game manager to update ui/camera on death
+    //function passed in by game manager to update ui/camera on death, avoinding any creation after scene close
     public void SetOnDestroyCallback(Action<GliderFlight, string, float> callback)
     {
-        onCrashCallback = callback; //calls HandleGliderDestroyed function in game manager
+        onCrashCallback = callback; //calls HandleGliderDestroyed function in game manager after all data is used
     }
-
-/*    //before destroy each glider needs to save distance and gene sequence in gene manager
-    //TODO: fix double destroy here resulting in 0 fit score (end of round causing respawning due to destroy callback or something)
-    void OnDestroy() //consider using OnDisable() in order to perform update a bit before memory cleanup
-    {
-
-
-    }*/
 
     //TESTING function to determine if COM of gliders are being correctly computed and maintained
     //Ensure "Gizmos" is enabled in the Scene View (top right corner).
     void OnDrawGizmos()
     {
-        //TODO: get this showing yellow dot for center of mass testing
+        //TODO: use this to correct COM and COP unctions
+        Gizmos.color = Color.green;
+        Gizmos.DrawSphere(getPositionOfCOM(), .25f); //draw green sphere to visualize center of mass (COM) on each glider
+        float velocityMag = rb.linearVelocity.magnitude;
+        float dynamicPressure = Mathf.Pow(velocityMag, 2) * DENSITY_OF_AIR / 2;
         Gizmos.color = Color.yellow;
-        Gizmos.DrawSphere(getPositionOfCOM(), .25f);//draw sphere to visualize center of mass on each glider
+        Gizmos.DrawSphere(getCenterOfPressureEstimate(velocityMag, dynamicPressure), .25f); //draw yellow sphere to visualize center of pressure (COP) on each glider
     }
 
     //calculate the center of pressure for glider's lift and drag act upon
     private Vector3 getCenterOfPressure(){
         //TODO actually calculate the position of COP
         return transform.position;
+    }
+
+    //COP can be estimated by chord length / 4 * (1 - moment coefficient / lift coefficient)
+    //COP is how far from the nose the COP is
+    private Vector3 getCenterOfPressureEstimate(float vMag, float q){
+        float radius = physNums.getRadius();
+        float coefficientOfLift = getCoefficientOfLift(vMag, q);
+        float offset = radius / 4 * (1 - getCoefficientOfMomentum(coefficientOfLift) / coefficientOfLift); //chord length = radius for our wing
+        previousCOPXOffset = offset; //offset is needed for coefficient of momentup
+        //TODO: test COP estimates
+        Vector3 COP = transform.position + new Vector3(radius - offset, 0, 0); //position as at back so add radius to get to nose then minus cop offset
+        return COP;
+    }
+
+    //helper function to get coefficient of momentum for COP estimate
+    //the formula needs coefficient of momentum so using the previous COP offset is the current solution
+    private float getCoefficientOfMomentum(float liftCoefficient){
+        //Cm = -Cl (COPx - MAC / 4) / MAC
+        float MAC = physNums.getMAC();
+        float momentumCoefficient = -liftCoefficient * (previousCOPXOffset - MAC / 4) / MAC;
+        return momentumCoefficient;
+    }
+
+    //adds glider position with set center of mass to get current COM position (might have to reposition glider prefab)
+    private Vector3 getPositionOfCOM()
+    {
+        //if (rb != null) return transform.position + rb.centerOfMass;//use null check if null ref occurs
+        //else return transform.position;
+        return transform.position + rb.centerOfMass;
     }
 
     //returns true if glider has fallen the fall height of the flight (or more), false if not
@@ -139,16 +165,6 @@ public class GliderFlight : MonoBehaviour
         float angleOfAttack = Vector3.Angle(relativeAirflow, transform.forward); //get angle
         float sign = Mathf.Sign(Vector3.Dot(Vector3.Cross(relativeAirflow, transform.right), transform.forward)); //determine if going up or down
         return angleOfAttack * sign;  // AOA is positive for nose-up, negative for nose-down
-        
-    }
-
-    //adds glider position with set center of mass to get current COM position (might have to reposition glider prefab)
-    private Vector3 getPositionOfCOM()
-    {
-        //if (rb != null) return transform.position + rb.centerOfMass;//use null check if null ref occurs
-        //else return transform.position;
-        return transform.position + rb.centerOfMass;
-        
         
     }
 

@@ -6,23 +6,23 @@ using UnityEngine;
  * 
  * @author Grant Benson
  **/
-public class SemiCircleFoldingAlgorithm : MonoBehaviour
+public class SemiCircleFoldingAlgorithm
 {
 
     //testing purposes
-    void Awake()
-    {
-        //Debug.Log("Start1");
-        PaperAirplanePhysicsAttributes airplaneAttributes = new PaperAirplanePhysicsAttributes(
-            numFolds: 1,
-            radius: 7.0f,
-            thickness: 0.2f,
-            density: 0.2f
-        );
-        Debug.Log(airplaneAttributes.ToString());
-    }
+    // void Awake()
+    // {
+    //     //Debug.Log("Start1");
+    //     PaperAirplanePhysicsAttributes airplaneAttributes = new PaperAirplanePhysicsAttributes(
+    //         numFolds: 1,
+    //         radius: 7.0f,
+    //         thickness: 0.2f,
+    //         density: 0.2f
+    //     );
+    //     Debug.Log(airplaneAttributes.ToString());
+    // }
 
-
+    //phys attributes that will be calculated given paper attributes
     public struct PaperAirplanePhysicsAttributes
     {
         private const float THICKNESS_MULTIPLIER_PER_FOLD = 1.7f;

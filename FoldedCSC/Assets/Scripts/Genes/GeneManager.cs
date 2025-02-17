@@ -10,7 +10,7 @@ using UnityEngine.SceneManagement;
  * 
  * @author Grant Benson
  **/
-public class GeneManger : MonoBehaviour
+public class GeneManager : MonoBehaviour
 {
     private GeneSequence BestCompetitor, SecondBestCompetitor = null; //keep track of first and second best gene sequences (init as null)
     private string bestCompName;
@@ -38,7 +38,6 @@ public class GeneManger : MonoBehaviour
             for (int i = 0; i < numberOfChildren; i++)
             {
                 offspring[i] = GetRandomGeneSequence();
-
             }
         }
         else
@@ -74,7 +73,7 @@ public class GeneManger : MonoBehaviour
         float width = UnityEngine.Random.Range(minPaperDimension, maxPaperThickness);
         float height = UnityEngine.Random.Range(minPaperDimension, maxPaperDimension);
         float throwAngle = UnityEngine.Random.Range(-maxThrowAngle, maxThrowAngle);
-        //GeneSequence(int numberOfFolds, float initialVelocity, float paperDensity, float paperLength, float paperHeight, float paperWidth)
+        //GeneSequence(int numberOfFolds, float initialVelocity, float paperDensity, float paperLength, float paperHeight, float paperWidth, float initialAngle)
         return new GeneSequence(numberOfFolds, throwSpeed, density, length, height, width, throwAngle);
     }
 
@@ -84,7 +83,7 @@ public class GeneManger : MonoBehaviour
         //update best competitor if it travelled further than previous best competitor
         if (distTravelled > BestCompetitorDist)
         {
-            //set sequence and distance travelled
+            //set best gene sequence and distance travelled
             BestCompetitor = geneRep;
             BestCompetitorDist = distTravelled;
             return; //return early
@@ -118,11 +117,9 @@ public class GeneManger : MonoBehaviour
     {
         GeneSequence[] returnPlanes = new GeneSequence[numChildren]; //create array to return
         returnPlanes[0] = parent1;//add top competitor back to ensure no loss in fitness score between rounds/generations
-        //loop from 1 (already added best competitor) to desired number of children
-        for (int i = 1; i < numChildren; i++)
+        for (int i = 1; i < numChildren; i++) //loop from 1 (already added best competitor from previous round to prevent regression) to desired number of children
         {
-            //calculates and sets gene sequence at index (uses i as splice index too)
-            returnPlanes[i] = GetGeneAtSplicePoint(parent1, parent2, i);
+            returnPlanes[i] = GetGeneAtSplicePoint(parent1, parent2, i); //calculates and sets gene sequence at index (uses i as splice index too)
         }
 
         return returnPlanes; //returns array of gene sequences to be used in glider instantiation
