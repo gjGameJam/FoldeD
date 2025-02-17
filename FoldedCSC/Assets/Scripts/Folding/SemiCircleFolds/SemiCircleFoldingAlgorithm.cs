@@ -6,7 +6,7 @@ using UnityEngine;
  * 
  * @author Grant Benson
  **/
-public class SemiCircleFoldingAlgorithm
+public class SemiCircleFoldingAlgorithm : MonoBehaviour //TODO: consider removing MonoBehaviour for efficiency
 {
 
     //testing purposes
