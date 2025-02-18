@@ -29,9 +29,9 @@ public class GliderFlight : MonoBehaviour
     private float fitnessScore;
     private float startingElevation;
     private float fallHeight = 5; //allow gliders to fall 5 meters before being destroyed
-    private float previousTotalDrag = 0;
-    private float previousTotalLift = 0;
-    private float previousCOPXOffset = 0; //TODO: set this as appropriate starting value in start (like MAC / 4 or radius / 4)
+    private float previousTotalDrag = 0; //TODO: consider setting approximation on start
+    private float previousTotalLift = 0; //TODO: consider setting approximation on start
+    private float previousCOPXOffset = 0; //setting approximation on start
     private Action<GliderFlight, string, float> onCrashCallback;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -46,6 +46,10 @@ public class GliderFlight : MonoBehaviour
         rb.centerOfMass = physNums.getCenterOfMass(); //set rigid body center of mass from phys calcs
         //set mass of rb as well from phys calcs
         rb.mass = physNums.getMass();
+        //angle the glider appropriately based on intial AOA from gene sequence
+        transform.rotation = Quaternion.Euler(0, 0, geneSeq.GetInitialAngle());
+        //set the previous center of pressure to be MAC / 3 (approximation for delta wings)
+        previousCOPXOffset = physNums.getMAC / 3;
     }
 
     // Update is called once per frame
@@ -121,7 +125,7 @@ public class GliderFlight : MonoBehaviour
 
     //calculate the center of pressure for glider's lift and drag act upon
     private Vector3 getCenterOfPressure(){
-        //TODO actually calculate the position of COP
+        //TODO actually calculate the position of COP via lift integral method (more accurate than estimation)
         return transform.position;
     }
 
@@ -175,29 +179,33 @@ public class GliderFlight : MonoBehaviour
         //skin friction is dynamic pressure * wetted surface area * skin friction coefficient
         float skinFriction = q * physNums.GetTotalArea() * getCoefficientOfSkinFrictionDrag(vMag); //friction generated when air molecules stick to flying object (10-30% of drag)
         //induced drag is force of lift^2 / (dynamic pressure * wings surface area * PI * oswald efficiency factor * aspect ratio)
-        float aspectRat = getAspectRatio(physNums.getWingspan(), physNums.getTopArea()); //consider setting this at start or moving to physnums to calc + get
-        float inducedDrag = Mathf.Pow(liftForce, 2) / (q * physNums.getTopArea() * Mathf.PI * getOswaldApproximation(aspectRat) * aspectRat);
+        float aspectRat = getAspectRatio(physNums.getWingspan(), getEffectiveWingArea()); //consider setting this at start or moving to physnums to calc + get
+        float inducedDrag = Mathf.Pow(liftForce, 2) / (q * getEffectiveWingArea() * Mathf.PI * getOswaldApproximation(aspectRat) * aspectRat);
         //form drag is dynamic pressure * Sfront * form drag coefficient
-        float formDrag = q * physNums.getFrontArea() * getCoefficientOfFormDrag(vMag);
+        float formDrag = q * getEffectiveFrontArea() * getCoefficientOfFormDrag(vMag);
 
         //sum all drag contributors and return total drag
         return skinFriction + inducedDrag + formDrag;
+    }
+
+    //function to get effective wing area given angle of attack
+    private float getEffectiveWingArea(){
+        return physNums.getTopArea();
+    }
+
+    //function to get effective nose area given angle of attack
+    private float getEffectiveFrontArea(){
+        return physNums.getFrontArea();
     }
 
     //get lift force function: Flift = p v^2 / 2 SAwing CLift = q * SAwing * CLift
     private float getLiftForce(float vMag, float q)
     {
         //return 0f; //consider returning 0 if AOA is too high (stall out effect)
-        float wingArea = physNums.getTopArea();
+        float wingArea = getEffectiveWingArea();
         float liftForce = q * wingArea * getCoefficientOfLift(vMag, q); //q * SAwing * CLift
         previousTotalLift = liftForce;
         return liftForce;
-    }
-
-    //force of gravity is just Mass * AccelerationOfGrav
-    private float ForceOfGravity()
-    {
-        return (rb.mass * ACCELERATION_OF_GRAVITY);//consider using other equation (that uses both masses and distance) to incorporate other planets
     }
 
     //helper function Lift Coefficient = 2 * Flift / p v^2 SAwing (using lift from previous update loop for coefficient)
@@ -206,7 +214,18 @@ public class GliderFlight : MonoBehaviour
         //since Coefficient = 2 * Flift / p v^2 SAwing
         //q = p v^2 / 2
         //2 * Flift / p v^2 SAwing = 2 * Flift / 2 * q = Flift / q
+        if (previousTotalLift == 0) 
+        {
+            // Estimate initial lift using dynamic pressure and wing area
+            previousTotalLift = q * getEffectiveWingArea() * 0.4f; // 0.4 is a typical CL guess
+        }
         return previousTotalLift / q;
+    }
+
+    //force of gravity is just Mass * AccelerationOfGrav
+    private float ForceOfGravity()
+    {
+        return (rb.mass * ACCELERATION_OF_GRAVITY);//consider using other equation (that uses both masses and distance) to incorporate other planets
     }
 
     //gets coefficient of form drag
@@ -216,7 +235,7 @@ public class GliderFlight : MonoBehaviour
         }
 
         // Cd = (2 * FdragTotal) / (DENSITY_OF_AIR * V^2 * Sfront)
-        return (2f * previousTotalDrag) / (DENSITY_OF_AIR * Mathf.Pow(velocityMag, 2) * physNums.getFrontArea());
+        return (2f * previousTotalDrag) / (DENSITY_OF_AIR * Mathf.Pow(velocityMag, 2) * getEffectiveFrontArea());
     }
 
     //gets coefficient of skin friction drag
