@@ -42,7 +42,7 @@ public class GliderFlight : MonoBehaviour
         // Get the current GameObject and set fitness score to x value on start and set starting elevation to y value
         startingFitness = transform.position.x;
         startingElevation = transform.position.y;
-        rb = GetComponent<Rigidbody>(); //TODO: get rigid body of glider
+        rb = GetComponent<Rigidbody>();
         rb.centerOfMass = physNums.getCenterOfMass(); //set rigid body center of mass from phys calcs
         //set mass of rb as well from phys calcs
         rb.mass = physNums.getMass();
@@ -50,19 +50,24 @@ public class GliderFlight : MonoBehaviour
         transform.rotation = Quaternion.Euler(0, 0, geneSeq.GetInitialAngle());
         //set the previous center of pressure to be MAC / 3 (approximation for delta wings)
         previousCOPXOffset = physNums.getMAC / 3;
+        //give rigid body initial velocity from throw
+        rb.velocity = new Vector3(geneSeq.GetInitialVelocity(), 0, 0);
     }
 
     // Update is called once per frame
     void Update()
     {
         //TESTING: using gene sequence.GetInitialVelocity() to create linear flight paths
-        if (physNums.CanFly())
+        if (!physNums.CanFly())
         {
-            //Debug.Log("glider fly :)");
+            return;
+            //Debug.Log("glider flight");
             //add movement to parent position
-            float xMovementAmount = geneSeq.GetInitialVelocity() * Time.deltaTime;
-            float yMovementAmount = 2 * Time.deltaTime;
-            transform.position += new Vector3(xMovementAmount, -yMovementAmount, 0);
+            //float xMovementAmount = geneSeq.GetInitialVelocity() * Time.deltaTime;
+            //Vector3 fowardMovement = transform.forward * geneSeq.GetInitialVelocity() * Time.deltaTime;
+            //transform.position += fowardMovement;
+            //float yMovementAmount = 2 * Time.deltaTime;
+            //transform.position += new Vector3(xMovementAmount, 0, 0);
         }
 
         //END OF TESTING: linear flight is successfully being tracked by camera manager
@@ -73,7 +78,7 @@ public class GliderFlight : MonoBehaviour
             //destroy the glider if it has fallen down the specified height
             float finalFitnessScore = getFitnessScore();
             //update gene manager with the gene sequence and fitness score (distance travelled in x direction)
-            geneManager.UpdateBestCompetitor(geneSeq, finalFitnessScore);
+            geneManager.UpdateBestCompetitor(geneSeq, finalFitnessScore); //saving here prevents errors when callback is called in game manager
             onCrashCallback(this, geneSeq.getName(), finalFitnessScore); // Pass the glider flight instance to the callback to be destroyed
         }
 
@@ -90,7 +95,7 @@ public class GliderFlight : MonoBehaviour
         //COM calcs
         //gravity will always pull directly down on the COM, the only force balancing out the forces on the COP
         Vector3 forceOnCenterOfMass = new Vector3(0, -ForceOfGravity(), 0); //apply force of gravity downward on COM
-                                                                            //COP calcs
+        //COP calcs
         float liftForce = getLiftForce(velocityMag, dynamicPressure);
         //TODO: combine into one vector3 once accuracy in ensured to improve performance
         Vector3 drag = getDragForce(liftForce, velocityMag, dynamicPressure) * dragDirection;//DragVector = dragForce * dragDirection
@@ -99,7 +104,7 @@ public class GliderFlight : MonoBehaviour
 
         //third apply forces at COP and COM
         //TODO: assure accuracy of COP, COM, lift force, and drag force
-        //rb.AddForce(forceOnCenterOfMass, ForceMode.Force); //apply gravitational force to center of mass (COM)
+        rb.AddForce(forceOnCenterOfMass, ForceMode.Force); //apply gravitational force to center of mass (COM)
         //rb.AddForceAtPosition(drag + lift, getCenterOfPressureEstimate(velocityMag, dynamicPressures), ForceMode.Force); //apply drag and lift force to center of pressure (COP)
 
     }
@@ -114,7 +119,7 @@ public class GliderFlight : MonoBehaviour
     //Ensure "Gizmos" is enabled in the Scene View (top right corner).
     void OnDrawGizmos()
     {
-        //TODO: use this to correct COM and COP unctions
+        //TODO: use this to verify correctness of COM and COP functions
         Gizmos.color = Color.green;
         Gizmos.DrawSphere(getPositionOfCOM(), .25f); //draw green sphere to visualize center of mass (COM) on each glider
         float velocityMag = rb.linearVelocity.magnitude;
@@ -284,7 +289,6 @@ public class GliderFlight : MonoBehaviour
         {
             return 0f; //prevent negative number
         }
-        //TODO: verify and calculate L as mean aerodynamic chord (MAC)
         float MAC = physNums.getMAC();
         if (MAC <= 0f)
         {
