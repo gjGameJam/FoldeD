@@ -47,9 +47,10 @@ public class GliderFlight : MonoBehaviour
         //set mass of rb as well from phys calcs
         rb.mass = physNums.getMass();
         //angle the glider appropriately based on intial AOA from gene sequence
-        transform.rotation = Quaternion.Euler(0, 0, geneSeq.GetInitialAngle());
+        float initialAOA = geneSeq.GetInitialAngle();
+        transform.rotation = Quaternion.Euler(0, 0, initialAOA);
         //set the previous center of pressure to be MAC / 3 (approximation for delta wings)
-        previousCOPXOffset = physNums.getMAC / 3;
+        previousCOPXOffset = getInitialCOPEstimation(initialAOA);
         //give rigid body initial velocity from throw
         rb.velocity = new Vector3(geneSeq.GetInitialVelocity(), 0, 0);
     }
@@ -107,6 +108,12 @@ public class GliderFlight : MonoBehaviour
         rb.AddForce(forceOnCenterOfMass, ForceMode.Force); //apply gravitational force to center of mass (COM)
         //rb.AddForceAtPosition(drag + lift, getCenterOfPressureEstimate(velocityMag, dynamicPressures), ForceMode.Force); //apply drag and lift force to center of pressure (COP)
 
+    }
+
+    //gets the initial estimate for center of pressure offset using MAC / 3 and angle of attack
+    private float getInitialCOPEstimation(float AOA){
+        float MAC = physNums.getMAC();
+        return MAC / 3 + (MAC / 6) * Mathf.Sin(AOA * Mathf.Deg2Rad);
     }
 
     //function passed in by game manager to update ui/camera on death, avoinding any creation after scene close
