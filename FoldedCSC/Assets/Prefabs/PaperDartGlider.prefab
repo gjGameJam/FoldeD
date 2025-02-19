@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: -4133622300978173518}
   - component: {fileID: -4443400922333364532}
   - component: {fileID: -8640466328729326348}
+  - component: {fileID: -7364228008354022254}
   m_Layer: 0
   m_Name: PaperDartGlider
   m_TagString: Glider
@@ -141,3 +142,25 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!64 &-7364228008354022254
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3667665961188783457}
+  m_Material: {fileID: 13400000, guid: 0a75426cb99975d4e8ed060d7560c12c, type: 2}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 0}

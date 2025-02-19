@@ -43,20 +43,25 @@ public class GliderFlight : MonoBehaviour
         startingFitness = transform.position.x;
         startingElevation = transform.position.y;
         rb = GetComponent<Rigidbody>();
+        rb.linearDamping = 0f;
+        rb.angularDamping = 0f;
+        rb.constraints = RigidbodyConstraints.None;
         rb.centerOfMass = physNums.getCenterOfMass(); //set rigid body center of mass from phys calcs
         //set mass of rb as well from phys calcs
         rb.mass = physNums.getMass();
         //angle the glider appropriately based on intial AOA from gene sequence
         float initialAOA = geneSeq.GetInitialAngle();
-        transform.rotation = Quaternion.Euler(0, 0, initialAOA);
+        //transform.rotation = Quaternion.Euler(0, 0, initialAOA);
         //set the previous center of pressure to be MAC / 3 (approximation for delta wings)
         previousCOPXOffset = getInitialCOPEstimation(initialAOA);
         //give rigid body initial velocity from throw
         Debug.Log("Velocity to add: " + geneSeq.GetInitialVelocity());
         //rb.linearVelocity = new Vector3(geneSeq.GetInitialVelocity(), 0, 0);
+        rb.WakeUp();
         rb.AddForce(new Vector3(geneSeq.GetInitialVelocity(), 0, 0), ForceMode.VelocityChange);
         Debug.Log("Initial Velocity after: " + rb.linearVelocity);
     }
+
 
     // Update is called once per frame
     void Update()

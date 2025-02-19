@@ -95,7 +95,17 @@ public class TriangleGenerator : MonoBehaviour
             //meshRenderer.material = new Material(Shader.Find("Standard"));
              meshRenderer.material.SetFloat("_CullMode", (float)UnityEngine.Rendering.CullMode.Back); // Optional: Disable backface culling to render both sides
         }
-        
+
+        // adds the mesh to the mesh collider
+        MeshCollider meshCollider = GetComponent<MeshCollider>();
+        if (meshCollider == null)
+        {
+            meshCollider = gameObject.AddComponent<MeshCollider>();
+        }
+
+        meshCollider.sharedMesh = meshFilter.mesh; // assign generated mesh to collider
+        meshCollider.convex = true; // required for Rigidbody interaction?
+
 
     }
 
