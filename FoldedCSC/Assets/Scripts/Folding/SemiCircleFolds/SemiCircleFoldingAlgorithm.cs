@@ -219,7 +219,7 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour //TODO: consider removin
         }
 
         //helper function to get mass: gets volume of quarter circle (area * thickness) then mutlply by density to get mass
-        private float getMassOfQuarterCirclularPrism(float r, float t, float d)
+        private float getMassOfQuarterCirclularPrism(float r, float t, float d) //TODO: fix mass (numbers are too high to be kg)
         {
             return (t * Mathf.PI * Mathf.Pow(r, 2) / 4) * d;
         }

@@ -52,12 +52,17 @@ public class GliderFlight : MonoBehaviour
         //set the previous center of pressure to be MAC / 3 (approximation for delta wings)
         previousCOPXOffset = getInitialCOPEstimation(initialAOA);
         //give rigid body initial velocity from throw
-        rb.velocity = new Vector3(geneSeq.GetInitialVelocity(), 0, 0);
+        Debug.Log("Velocity to add: " + geneSeq.GetInitialVelocity());
+        //rb.linearVelocity = new Vector3(geneSeq.GetInitialVelocity(), 0, 0);
+        rb.AddForce(new Vector3(geneSeq.GetInitialVelocity(), 0, 0), ForceMode.VelocityChange);
+        Debug.Log("Initial Velocity after: " + rb.linearVelocity);
     }
 
     // Update is called once per frame
     void Update()
     {
+        //rb.linearVelocity = new Vector3(geneSeq.GetInitialVelocity(), 0, 0);
+        //Debug.Log("Initial Velocity after: " + rb.linearVelocity);
         //TESTING: using gene sequence.GetInitialVelocity() to create linear flight paths
         if (!physNums.CanFly())
         {
@@ -82,6 +87,8 @@ public class GliderFlight : MonoBehaviour
             geneManager.UpdateBestCompetitor(geneSeq, finalFitnessScore); //saving here prevents errors when callback is called in game manager
             onCrashCallback(this, geneSeq.getName(), finalFitnessScore); // Pass the glider flight instance to the callback to be destroyed
         }
+
+        //Debug.Log("glider flight");
 
         //first calculate direction
         Vector3 relativeAirflow = -rb.linearVelocity.normalized; //determine relative air flow in order to apply drag on the COP in opposite direction
