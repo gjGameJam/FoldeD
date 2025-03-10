@@ -48,7 +48,7 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour //TODO: consider removin
             //don't allow any flight until all calculations are complete
             this.canFly = false;
             //initialize number of folds, radius, thickness, and calculate mass via volume and density from paper type
-            this.numberOfFolds = -1;
+            this.numberOfFolds = -1; //will calculate max number of folds and clamp before calculations using this number
             this.radius = radius;
             this.thickness = thickness; //this is the thickness of the paper itself, not the entire glider (which is usually multiple folds thick)
             this.mass = -1; //need to calculate mass with volume and density
@@ -82,20 +82,28 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour //TODO: consider removin
             // 3 R = d (2^n + 4)(2^n - 1) //divide by PI and multiply by 6
             // 3 R / d = (2^n + 4)(2^n - 1) //divide by thickness
 
+            //arc length stays the same with folding
             float arcLength = (Mathf.PI * length) / 2; // Quarter-circle arc length (before folds to determine max folds)
-            float foldValue = (3 * arcLength) / thickness;  // Left-hand side of equation
-            
+            float foldPow = 1; // 2^n tracking
+            float effectiveThickness = thickness; //at folds 0 or 1 thickness stays the same. keep track of how thick paper being folded is
             int n = 0;
             while (true) 
             {
-                float foldPow = Mathf.Pow(2, n); //prevent redudant calculation
+                if (n > 1) //thickness of paper increases exponentially per fold after first fold
+                {
+                    effectiveThickness =  thickness * Mathf.Pow(THICKNESS_MULTIPLIER_PER_FOLD, n - 1); 
+                }
+                float foldValue = (3 * arcLength) / effectiveThickness;  // Left-hand side of equation
                 float foldRequirement = (foldPow + 4) * (foldPow - 1); //Gallivan's formula (right side)
-                if (foldRequirement > foldValue) break;
+                if (foldRequirement > foldValue){ //if left side if greater than right side, we know that folding configuration is invalid
+                    Debug.Log($"Capping folds = {n - 1}, Effective Thickness = {effectiveThickness}, Radius = {length}, Fold Requirement = {foldRequirement}, Fold Value = {foldValue}");
+                    break;
+                }
                 n++; //increment n while fold requirements are met
+                foldPow *= 2; // Update 2^n
             }
             
-            return n - 1; // Subtract 1 since we exceed max folds in last iteration
-            
+            return n - 1; // subtract one from n becuase fold requirement was met by previous number of folds
         }
 
         //get mean aerodynamic coord length
