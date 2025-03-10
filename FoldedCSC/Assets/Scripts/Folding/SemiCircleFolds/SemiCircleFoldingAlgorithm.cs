@@ -48,7 +48,7 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour //TODO: consider removin
             //don't allow any flight until all calculations are complete
             this.canFly = false;
             //initialize number of folds, radius, thickness, and calculate mass via volume and density from paper type
-            this.numberOfFolds = numFolds;
+            this.numberOfFolds = -1;
             this.radius = radius;
             this.thickness = thickness; //this is the thickness of the paper itself, not the entire glider (which is usually multiple folds thick)
             this.mass = -1; //need to calculate mass with volume and density
@@ -59,6 +59,7 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour //TODO: consider removin
             this.MAC = -1;
             this.wingspan = -1;
             this.totalArea = -1;
+            this.numberOfFolds = Mathf.Clamp(numFolds, 0, GetMaxFolds(radius, thickness)); //clamp number of folds to obtainable amount given paper dimensions using Gallivans formula
             this.wingspan = calculateWingspan(); //calculate wingspan before surface areas (it is needed for SA calcs)
             this.MAC = calculateMAC();
             this.middleArea = calculateMiddleArea();
@@ -68,6 +69,33 @@ public class SemiCircleFoldingAlgorithm : MonoBehaviour //TODO: consider removin
             this.mass = getMassOfQuarterCirclularPrism(radius, thickness, density);//calculate as quarter of small piece of circular prism
             this.COM = calculateCenterOfMass(); //calculate Center of mass (COM) that can be retrieved via getter later
             this.canFly = true;//allow glider flight only after calculations are complete
+        }
+
+        //TODO: ensure Britney Gallivan's formula for calcuting max number of folds for given dimensions is working appropriately
+        //this ensures all paper folding configurations are theoretically achievable
+        //TODO: come up with new formula because Gallivan's formula doesn't account for paper stiffness and will overestimate
+        private int GetMaxFolds(float length, float thickness){
+            // Gallivan's formula: L = d/6 PI (2^n + 4)(2^n - 1)  where d is thickness, n is maximum possible number of folds, and L is minimum lengths
+            //quarter-circle, the available length for folding is the arc length of the quarter-circle: L = PI R / 2
+            // L = d/6 PI (2^n + 4)(2^n - 1) //original formula
+            // PI R / 2 = d/6 PI (2^n + 4)(2^n - 1) //use arclength (relevant length)
+            // 3 R = d (2^n + 4)(2^n - 1) //divide by PI and multiply by 6
+            // 3 R / d = (2^n + 4)(2^n - 1) //divide by thickness
+
+            float arcLength = (Mathf.PI * length) / 2; // Quarter-circle arc length (before folds to determine max folds)
+            float foldValue = (3 * arcLength) / thickness;  // Left-hand side of equation
+            
+            int n = 0;
+            while (true) 
+            {
+                float foldPow = Mathf.Pow(2, n); //prevent redudant calculation
+                float foldRequirement = (foldPow + 4) * (foldPow - 1); //Gallivan's formula (right side)
+                if (foldRequirement > foldValue) break;
+                n++; //increment n while fold requirements are met
+            }
+            
+            return n - 1; // Subtract 1 since we exceed max folds in last iteration
+            
         }
 
         //get mean aerodynamic coord length

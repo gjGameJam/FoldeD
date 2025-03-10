@@ -70,7 +70,7 @@ public class GeneManager : MonoBehaviour
         float throwSpeed = UnityEngine.Random.Range(minThrowSpeed, maxThrowSpeed);
         float density = UnityEngine.Random.Range(minDensity, maxDensity);
         float length = UnityEngine.Random.Range(minPaperDimension, maxPaperDimension);
-        float width = UnityEngine.Random.Range(minPaperDimension, maxPaperThickness);
+        float width = UnityEngine.Random.Range(minPaperDimension, maxPaperThickness); //width of paper is thickness so special clamp to ensure folding can occur
         float height = UnityEngine.Random.Range(minPaperDimension, maxPaperDimension);
         float throwAngle = UnityEngine.Random.Range(-maxThrowAngle, maxThrowAngle);
         //GeneSequence(int numberOfFolds, float initialVelocity, float paperDensity, float paperLength, float paperHeight, float paperWidth, float initialAngle)
@@ -198,9 +198,12 @@ public class GeneManager : MonoBehaviour
                 {
                     toBeAdded = Clamp(toBeAdded, minDensity, maxDensity);
                 }
-                else if (i <= 5 && i >= 3)
+                else if (i == 3 || i == 4) //clamp non thickness paper dimensions to achievable bounds
                 {
-                    toBeAdded = Clamp(toBeAdded, minPaperDimension, maxPaperDimension); //clamping paper dimensions to achievable bounds
+                    toBeAdded = Clamp(toBeAdded, minPaperDimension, maxPaperDimension); 
+                }
+                else if (i == 5){
+                    UnityEngine.Random.Range(minPaperDimension, maxPaperThickness); //clamp paper thickness (width) so folds can occur
                 }
                 else if (i == 6) //clamp initial throw angle to -90 to 90
                 {
